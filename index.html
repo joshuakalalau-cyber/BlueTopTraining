@@ -76,7 +76,20 @@ input,select{font-family:inherit;}
 .nav-label-full{display:inline;}
 
 .main{flex:1;min-width:0;padding:28px 36px 60px;max-width:1120px;}
-.page-head{margin-bottom:24px;}
+.page-head{
+  position:relative;overflow:hidden;margin:-28px -36px 24px;padding:24px 36px 20px;
+  background:var(--panel);border-bottom:1px solid var(--border);
+}
+.page-head::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:0.09;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(201,162,39,0.9) 0px, rgba(201,162,39,0.9) 3px, transparent 3px, transparent 12px),
+    repeating-linear-gradient(-45deg, rgba(139,94,40,0.9) 0px, rgba(139,94,40,0.9) 3px, transparent 3px, transparent 12px),
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.6) 0px, rgba(0,0,0,0.6) 1px, transparent 1px, transparent 12px);
+  background-blend-mode:overlay, overlay, multiply;
+  background-size:14px 14px;
+}
+.page-head > *{position:relative;z-index:1;}
 .page-head h1{font-size:21px;margin:0 0 4px;font-weight:900;text-transform:uppercase;letter-spacing:0.05em;}
 .page-head .sub{color:var(--text-dim);font-size:13.5px;}
 .crumbs{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
@@ -219,6 +232,7 @@ input,select{font-family:inherit;}
 
   #app-shell.active{display:flex;}
   .main{padding:16px 14px calc(78px + env(safe-area-inset-bottom));max-width:100%;}
+  .page-head{margin:-16px -14px 20px;padding:18px 14px 16px;}
   .page-head h1{font-size:19px;}
 
   /* app-like horizontal scroll strips instead of wrapping to many rows */
