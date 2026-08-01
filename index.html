@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hitting Program</title>
+<title>Blue Top Training</title>
 <style>
 :root{
   --bg:#121214; --panel:#1a1a1d; --panel2:#202024; --border:#2c2c30;
   --text:#f2f2f3; --text-dim:#9a9aa0; --text-mute:#6b6b70;
-  --accent:#e0263e; --accent-dim:#7d1522; --green:#2fbf71; --amber:#e0a72e; --red:#e0263e;
+  --accent:#2f6fed; --accent-dim:#173a80; --green:#2fbf71; --amber:#e0a72e; --red:#e0263e;
   --radius:10px;
 }
 *{box-sizing:border-box;}
@@ -32,7 +32,7 @@ input,select{font-family:inherit;}
 .field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:8px;border:none;font-size:14px;font-weight:600;}
 .btn-primary{background:var(--accent);color:#fff;width:100%;margin-top:8px;}
-.btn-primary:hover{background:#c91f34;}
+.btn-primary:hover{background:#2559c9;}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
 .btn-ghost:hover{border-color:#48484e;}
 .demo-row{display:flex;gap:8px;margin-top:18px;}
@@ -45,7 +45,7 @@ input,select{font-family:inherit;}
 .sidebar{width:230px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 14px;position:sticky;top:0;height:100vh;}
 .sidebar .brand{display:flex;align-items:center;gap:10px;padding:0 8px 22px 8px;border-bottom:1px solid var(--border);margin-bottom:14px;}
 .sidebar .brand .mark{width:28px;height:28px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
-.sidebar .brand .name{font-weight:700;font-size:15px;}
+.sidebar .brand .name{font-weight:700;font-size:13.5px;line-height:1.2;}
 .nav-item{display:flex;align-items:center;gap:11px;padding:10px 10px;border-radius:8px;color:var(--text-dim);font-size:13.5px;font-weight:600;margin-bottom:2px;}
 .nav-item svg{width:18px;height:18px;flex-shrink:0;}
 .nav-item:hover{background:var(--panel2);color:var(--text);}
@@ -224,8 +224,8 @@ input,select{font-family:inherit;}
 
 <div id="login-screen">
   <div class="login-card">
-    <div class="login-logo"><div class="mark">H</div><div class="name">Hitting Program</div></div>
-    <div class="login-sub">One place for everything you need to train.</div>
+    <div class="login-logo"><div class="mark">B</div><div class="name">Blue Top Training</div></div>
+    <div class="login-sub">Hard work builds ballplayers — and better people.</div>
     <div class="field">
       <label>Username</label>
       <input type="text" id="login-user" placeholder="e.g. josh or hitter1">
@@ -245,7 +245,7 @@ input,select{font-family:inherit;}
 
 <div id="app-shell">
   <div class="sidebar">
-    <div class="brand"><div class="mark">H</div><div class="name">Hitting Program</div></div>
+    <div class="brand"><div class="mark">B</div><div class="name">Blue Top Training</div></div>
     <nav id="nav-items"></nav>
     <div class="nav-spacer"></div>
     <div class="sidebar-foot">
@@ -285,9 +285,15 @@ function icon(name){ return '<svg viewBox="0 0 24 24" fill="none" stroke="curren
 
 /* ---------------------- Sample content (6 categories) ------------------ */
 
+// v11: rebrand pass (Hitting Program -> Blue Top Training). The vision
+// statement and core values below are transcribed verbatim from Josh's own
+// facility-vision writeup — leading with them here is the actual "theme the
+// app around this" ask, not just a color swap.
 const PHILOSOPHY = {
-  title: "Hitting Philosophy",
+  title: "Blue Top Training — Culture & Philosophy",
   sections: [
+    { h:"Our Vision", body:"At Blue Top Training, we believe hard work builds both great ballplayers and great people. Rooted in a blue-collar work ethic, our facility instills dedication, willpower, and teamwork in every athlete. We teach that success isn't just about talent — it's about effort, reliability, and mastering your craft. Our mission is to develop skilled athletes and strong character, shaping leaders who carry the values of hard work, respect, and accountability into their lives and communities. We don't just build baseball players — we build better people on and off the field." },
+    { h:"What We Stand For", body:"1) Instill a blue-collar work ethic in training — the game is to work hard and outlast the competition.\n2) Foster a learning environment where athletes embrace challenges, treat setbacks as learning opportunities, and chase constant improvement.\n3) Hard work, respect, and accountability are our core values — not slogans, standards.\n4) Make dedication and perseverance visibly valued and celebrated, until they're the ingrained expectation for every athlete here, not the exception." },
     { h:"Why this program exists", body:"Every drill, lift, and rep in this app ties back to one goal: build a hitter who can get the barrel to the ball on time, on plane, with speed — over and over, under fatigue, in games that count. Nothing in here is included because it looks good in a video; it's included because it moves one of those four needles." },
     { h:"The six pillars", body:"1) Warm-Up & Cool-Down — prepare the body to move fast and recover so tomorrow's work counts.\n2) Tee Progressions — groove the swing pattern in a controlled environment before adding variables.\n3) Hitting Drills — layer in timing, pitch recognition, and live variability.\n4) Strength & Conditioning — build the force production and rotational power the swing draws on.\n5) Weighted Bat Program — train bat speed directly using overload/underload training.\n6) Metrics Dashboard — measure it, or it didn't happen. Every category above is tracked here." },
     { h:"How to use this app", body:"Your coach builds your starting program. You can log every session, see your numbers trend over time, and adjust within the plan as you get feedback. Consistency beats intensity — show up, log it, trust the process across the full block." },
@@ -650,7 +656,7 @@ const WEIGHTED_BAT = {
 };
 
 const CATEGORIES = [
-  { id:"philosophy", name:"Philosophy", icon:"target", desc:"Why the program is built this way.", showInLibrary:true },
+  { id:"philosophy", name:"Culture & Philosophy", icon:"target", desc:"Our vision, values, and why the program is built this way.", showInLibrary:true },
   { id:"warmup", name:"Warm-Up & Cool-Down", icon:"flame", desc:"Prep and recovery for every session.", showInLibrary:true },
   { id:"tee", name:"Tee Progressions", icon:"target", desc:"3-phase swing pattern development.", showInLibrary:true },
   { id:"bat", name:"Weighted Bat Program", icon:"flame", desc:"6-week overload/underload bat speed block.", showInLibrary:true },
