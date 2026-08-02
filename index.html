@@ -405,9 +405,16 @@ function teeStationLines(){
 // collapsed until someone taps "Watch," and each row gets its own small
 // toggle instead of one library-wide browsing experience.
 let openInlineVideo = {};
-function toggleInlineVideo(key, catId){
+// v18 fix: the Daily Hitting Plan reuses this same toggle for its Warm-Up/
+// Cool-Down "Watch" buttons (request #5), but the original implementation
+// always re-rendered via go('category', catId) — fine when you're already
+// on the Library page, but on Daily Hitting Plan it silently navigated you
+// away to the (unlinked) Library category page instead of just re-rendering
+// in place. Added a returnView/returnParam pair so each caller re-renders
+// wherever it actually is.
+function toggleInlineVideo(key, catId, returnView, returnParam){
   openInlineVideo[key] = !openInlineVideo[key];
-  go('category', catId);
+  go(returnView || 'category', returnView ? returnParam : catId);
 }
 function isDirectVideoFile(url){ return /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url); }
 // v17: short YouTube clips for Warm-Up/Cool-Down (request: "make a button to
@@ -419,9 +426,10 @@ function youTubeEmbedId(url){
   const m = /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i.exec(url);
   return m ? m[1] : null;
 }
-function inlineVideoToggleBtn(key, catId){
+function inlineVideoToggleBtn(key, catId, returnView, returnParam){
   const open = !!openInlineVideo[key];
-  return `<button class="video-toggle-btn" onclick="toggleInlineVideo('${key}','${catId}')">${icon('play')}<span>${open ? 'Hide' : 'Watch'}</span></button>`;
+  const args = returnView ? `'${key}','${catId}','${returnView}'${returnParam!==undefined ? `,'${returnParam}'` : ''}` : `'${key}','${catId}'`;
+  return `<button class="video-toggle-btn" onclick="toggleInlineVideo(${args})">${icon('play')}<span>${open ? 'Hide' : 'Watch'}</span></button>`;
 }
 function inlineVideoBody(url){
   if(!url) return `<div class="video-empty-inline">No video added yet — this slot is ready as soon as one is uploaded.</div>`;
@@ -1818,7 +1826,7 @@ function renderDailyPlan(){
         h += `<div class="simple-check-row" style="flex-direction:column;align-items:stretch;gap:0;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
             <span class="label">${item.name}</span>
-            ${inlineVideoToggleBtn(key, 'warmup')}
+            ${inlineVideoToggleBtn(key, 'warmup', 'daily-plan')}
           </div>
           ${openInlineVideo[key] ? inlineVideoBody(item.video) : ""}
         </div>`;
