@@ -1803,12 +1803,35 @@ function renderDailyPlan(){
     h += `</div></div>`;
     return h;
   }
+  // v17: Warm-Up/Cool-Down rows get an in-app "Watch" toggle right on the
+  // Daily Hitting Plan (request: short YouTube clips, played in-app, not a
+  // new tab) — reuses the same inlineVideoToggleBtn/inlineVideoBody +
+  // openInlineVideo[key] mechanism the Training Library page already had,
+  // with matching "warmup-{catIdx}-{itemIdx}" keys, since that page has no
+  // nav link and this is where hitters actually see these items day to day.
+  function videoBlock(title, catsWithIdx){
+    let h = `<div class="section-label">${title}</div><div class="item-block"><div style="padding-top:6px;">`;
+    catsWithIdx.forEach(([c, ci]) => {
+      c.items.forEach((item, ii) => {
+        const key = "warmup-"+ci+"-"+ii;
+        h += `<div class="simple-check-row" style="flex-direction:column;align-items:stretch;gap:0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <span class="label">${item.name}</span>
+            ${inlineVideoToggleBtn(key, 'warmup')}
+          </div>
+          ${openInlineVideo[key] ? inlineVideoBody(item.video) : ""}
+        </div>`;
+      });
+    });
+    h += `</div></div>`;
+    return h;
+  }
 
-  const warmupItems = WARMUP.categories.filter(c => !c.name.startsWith("Cool-Down")).flatMap(c => c.items.map(i => i.name));
-  const cooldownItems = WARMUP.categories.filter(c => c.name.startsWith("Cool-Down")).flatMap(c => c.items.map(i => i.name));
+  const warmupCats = WARMUP.categories.map((c,ci) => [c,ci]).filter(([c]) => !c.name.startsWith("Cool-Down"));
+  const cooldownCats = WARMUP.categories.map((c,ci) => [c,ci]).filter(([c]) => c.name.startsWith("Cool-Down"));
   const teeItems = teeStationLines();
 
-  html += block("Warm-Up", warmupItems);
+  html += videoBlock("Warm-Up", warmupCats);
   html += block("Tee Progressions", teeItems);
 
   if(bat.started && bat.week <= WEIGHTED_BAT.weeks.length){
@@ -1834,7 +1857,7 @@ function renderDailyPlan(){
     }).join("") + `</div></div>`;
   }
 
-  html += block("Cool-Down", cooldownItems);
+  html += videoBlock("Cool-Down", cooldownCats);
 
   // v5: Hitting Sessions Logged tracker — real history from completeHittingSession()
   html += `<div class="section-label">Hitting Sessions Logged</div>`;
