@@ -284,7 +284,7 @@ input,select{font-family:inherit;}
       <button class="btn btn-ghost" onclick="quickLogin('josh')">Demo: coach</button>
       <button class="btn btn-ghost" onclick="quickLogin('hitter1')">Demo: hitter</button>
     </div>
-    <div class="login-note">Prototype login for testing with hitters — demo accounts, no real signup yet.<br>Coach: josh / demo123 &nbsp;·&nbsp; Hitter: hitter1 / demo123</div>
+    <div class="login-note">Prototype login — no real signup yet.<br>Coach: josh / demo123 &nbsp;·&nbsp; Hitter: hitter1 / demo123<br>Beta testers: tester1&ndash;tester5 / beta2026 — each username keeps its own separate progress.</div>
   </div>
 </div>
 
@@ -353,22 +353,22 @@ const PHILOSOPHY = {
 const WARMUP = {
   categories: [
     { name:"General Warm-Up (5-8 min)", items:[
-      { name:"Jump rope or jog — 2 min easy", video:null },
-      { name:"World's greatest stretch — 5/side", video:null },
-      { name:"Leg swings (front/back, side/side) — 10/side", video:null },
-      { name:"Band pull-aparts — 2x15", video:null },
+      { name:"Jump rope or jog — 2 min easy", video:"https://www.youtube.com/watch?v=AqufusshTDg" },
+      { name:"World's greatest stretch — 5/side", video:"https://www.youtube.com/watch?v=-CiWQ2IvY34" },
+      { name:"Leg swings (front/back, side/side) — 10/side", video:"https://www.youtube.com/watch?v=difYoBtZi2s" },
+      { name:"Band pull-aparts — 2x15", video:"https://www.youtube.com/watch?v=LoBBo1dtY6I" },
     ]},
     { name:"Movement Prep (5 min)", items:[
-      { name:"Med ball rotational throws — 2x5/side", video:null },
-      { name:"Walking lunges w/ twist — 2x8/side", video:null },
-      { name:"Lateral shuffle + reach — 2x10 yd", video:null },
-      { name:"Arm circles + shoulder dislocates — 10 each", video:null },
+      { name:"Med ball rotational throws — 2x5/side", video:"https://www.youtube.com/watch?v=DttZ5JU-b_U" },
+      { name:"Walking lunges w/ twist — 2x8/side", video:"https://www.youtube.com/watch?v=7yrkGWJHSP0" },
+      { name:"Lateral shuffle + reach — 2x10 yd", video:"https://www.youtube.com/watch?v=mziPKITnPeQ" },
+      { name:"Arm circles + shoulder dislocates — 10 each", video:"https://www.youtube.com/watch?v=GTf_xy8QJi8" },
     ]},
     { name:"Cool-Down (5 min)", items:[
-      { name:"Box breathing — 1 min", video:null },
-      { name:"Hip flexor stretch — 30s/side", video:null },
-      { name:"Thoracic spine rotation on foam roll — 1 min/side", video:null },
-      { name:"Forearm/wrist flexor stretch — 30s/side", video:null },
+      { name:"Box breathing — 1 min", video:"https://www.youtube.com/watch?v=ruElUiVoQPQ" },
+      { name:"Hip flexor stretch — 30s/side", video:"https://www.youtube.com/watch?v=q-Wt6yc4zX8" },
+      { name:"Thoracic spine rotation on foam roll — 1 min/side", video:"https://www.youtube.com/watch?v=K7ZFeEZr2sA" },
+      { name:"Forearm/wrist flexor stretch — 30s/side", video:"https://www.youtube.com/watch?v=rQlDHgTUbO0" },
     ]},
   ]
 };
@@ -409,6 +409,15 @@ function toggleInlineVideo(key, catId){
   go('category', catId);
 }
 function isDirectVideoFile(url){ return /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url); }
+// v17: short YouTube clips for Warm-Up/Cool-Down (request: "make a button to
+// click that takes you to the video within the app itself and not in a new
+// browser") — parse the video ID out of any common YouTube URL shape and
+// embed it in an iframe right in the toggle body, instead of the old
+// target="_blank" link-out fallback.
+function youTubeEmbedId(url){
+  const m = /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i.exec(url);
+  return m ? m[1] : null;
+}
 function inlineVideoToggleBtn(key, catId){
   const open = !!openInlineVideo[key];
   return `<button class="video-toggle-btn" onclick="toggleInlineVideo('${key}','${catId}')">${icon('play')}<span>${open ? 'Hide' : 'Watch'}</span></button>`;
@@ -416,6 +425,8 @@ function inlineVideoToggleBtn(key, catId){
 function inlineVideoBody(url){
   if(!url) return `<div class="video-empty-inline">No video added yet — this slot is ready as soon as one is uploaded.</div>`;
   if(isDirectVideoFile(url)) return `<video src="${url}" controls playsinline style="width:100%;border-radius:8px;margin-top:8px;background:#000;"></video>`;
+  const ytId = youTubeEmbedId(url);
+  if(ytId) return `<div style="position:relative;width:100%;padding-top:56.25%;margin-top:8px;border-radius:8px;overflow:hidden;background:#000;"><iframe src="https://www.youtube.com/embed/${ytId}" title="Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;"></iframe></div>`;
   return `<a href="${url}" target="_blank" rel="noopener" class="video-link-inline">Watch video &#8599;</a>`;
 }
 
@@ -687,16 +698,77 @@ function scBlockMetaForWeek(track, week){
   return { focus: blocks[idx].focus, label: blocks[idx].label, weekInBlock, blockIndex: idx };
 }
 
-// Weighted Bat Program — 6-week overload/underload block
+// Weighted Bat Program — 6-week overload/underload bat speed block. v17:
+// restructured from flat week-level focus/plan text (no day or set
+// breakdown) to the same week -> day -> set-by-set model Strength &
+// Conditioning uses, so it can log real weight/reps per set and mark days
+// complete the same way S&C does. Content keeps the original overload/
+// underload/contrast progression and test-week placement (baseline Week 1,
+// mid Week 3, end Week 6) — now split into 2 training days per week.
 const WEIGHTED_BAT = {
-  overview: "6-week overload/underload bat speed block. Test at start, mid (week 3), and end (week 6) using Blast Motion + radar gun. Deload automatically triggered by 3 consecutive session declines in bat speed.",
+  overview: "6-week overload/underload bat speed block, 2 sessions a week. Test at start (Week 1), mid (Week 3), and end (Week 6) using Blast Motion + radar gun. Deload automatically triggered by 3 consecutive session declines in bat speed.",
   weeks: [
-    { wk:1, focus:"Baseline + overload introduction", plan:"Heavy bat (+3-5oz) dry swings 3x5, standard bat tee work 3x10" },
-    { wk:2, focus:"Overload volume up", plan:"Heavy bat 4x5, standard bat tee 3x10, light bat (-3oz) flip 2x8" },
-    { wk:3, focus:"MID TEST — Blast Motion + radar", plan:"Full testing session, log to Dashboard, compare to baseline" },
-    { wk:4, focus:"Underload emphasis", plan:"Light bat 4x6, standard bat live BP 3x10" },
-    { wk:5, focus:"Contrast (heavy/light superset)", plan:"Heavy-light contrast pairs 4x(3+3), standard bat game-speed BP" },
-    { wk:6, focus:"END TEST — Blast Motion + radar", plan:"Full testing session, compare to baseline + mid, decide next block" },
+    { wk:1, focus:"Baseline + Overload Introduction", testWeek:true, days:[
+      { day:"Day 1 — Baseline Test", items:[
+        { name:"Bat Speed Baseline Test", sets:"3x5", note:"Blast Motion + radar gun, full-effort tee swings — log the number, this is your Week 1/3/6 comparison point" },
+        { name:"Standard Bat Tee Work", sets:"3x10", note:"Normal bat weight, standard tee progression pace" },
+      ]},
+      { day:"Day 2 — Overload Introduction", items:[
+        { name:"Heavy Bat Dry Swings (+3-5oz)", sets:"3x5", note:"No ball — pattern work only, stay on time and don't rush to compensate for the extra weight" },
+        { name:"Standard Bat Tee Work", sets:"3x10" },
+      ]},
+    ]},
+    { wk:2, focus:"Overload Volume Up", testWeek:false, days:[
+      { day:"Day 1 — Heavy Bat Emphasis", items:[
+        { name:"Heavy Bat Dry Swings (+3-5oz)", sets:"4x5" },
+        { name:"Standard Bat Tee Work", sets:"3x10" },
+      ]},
+      { day:"Day 2 — Overload + Light Intro", items:[
+        { name:"Heavy Bat Dry Swings (+3-5oz)", sets:"3x5" },
+        { name:"Light Bat Flips (-3oz)", sets:"2x8" },
+        { name:"Standard Bat Tee Work", sets:"3x10" },
+      ]},
+    ]},
+    { wk:3, focus:"MID TEST", testWeek:true, days:[
+      { day:"Day 1 — Mid Test", items:[
+        { name:"Bat Speed Mid Test", sets:"3x5", note:"Blast Motion + radar gun — compare directly to Week 1 baseline, log to Dashboard" },
+        { name:"Standard Bat Tee Work", sets:"3x10" },
+      ]},
+      { day:"Day 2 — Recovery / Light Volume", items:[
+        { name:"Light Bat Flips (-3oz)", sets:"3x8" },
+        { name:"Standard Bat Tee Work", sets:"2x10" },
+      ]},
+    ]},
+    { wk:4, focus:"Underload Emphasis", testWeek:false, days:[
+      { day:"Day 1 — Light Bat Emphasis", items:[
+        { name:"Light Bat Dry Swings (-3oz)", sets:"4x6" },
+        { name:"Standard Bat Live BP", sets:"3x10" },
+      ]},
+      { day:"Day 2 — Underload + Standard", items:[
+        { name:"Light Bat Dry Swings (-3oz)", sets:"3x6" },
+        { name:"Standard Bat Live BP", sets:"3x10" },
+      ]},
+    ]},
+    { wk:5, focus:"Contrast (Heavy/Light Superset)", testWeek:false, days:[
+      { day:"Day 1 — Contrast Pairs", items:[
+        { name:"Heavy-Light Contrast Pairs (+3-5oz / -3oz)", sets:"4x(3+3)", note:"Alternate one heavy-bat rep then one light-bat rep, immediately back to back" },
+        { name:"Standard Bat Game-Speed BP", sets:"3x10" },
+      ]},
+      { day:"Day 2 — Contrast + Tee", items:[
+        { name:"Heavy-Light Contrast Pairs (+3-5oz / -3oz)", sets:"3x(3+3)" },
+        { name:"Standard Bat Tee Work", sets:"3x10" },
+      ]},
+    ]},
+    { wk:6, focus:"END TEST", testWeek:true, days:[
+      { day:"Day 1 — End Test", items:[
+        { name:"Bat Speed End Test", sets:"3x5", note:"Blast Motion + radar gun — compare to baseline + mid, decide next block" },
+        { name:"Standard Bat Tee Work", sets:"3x10" },
+      ]},
+      { day:"Day 2 — Confirmation", items:[
+        { name:"Bat Speed Confirmation Test", sets:"2x5" },
+        { name:"Standard Bat Live BP", sets:"3x10" },
+      ]},
+    ]},
   ]
 };
 
@@ -704,7 +776,7 @@ const CATEGORIES = [
   { id:"philosophy", name:"Culture & Philosophy", icon:"target", desc:"Our vision, values, and why the program is built this way.", showInLibrary:true },
   { id:"warmup", name:"Warm-Up & Cool-Down", icon:"flame", desc:"Prep and recovery for every session.", showInLibrary:true },
   { id:"tee", name:"Tee Progressions", icon:"target", desc:"3-phase swing pattern development.", showInLibrary:true },
-  { id:"bat", name:"Weighted Bat Program", icon:"flame", desc:"6-week overload/underload bat speed block.", showInLibrary:true },
+  { id:"bat", name:"Weighted Bat Program", icon:"flame", desc:"6-week overload/underload bat speed block.", showInLibrary:false },
   { id:"strength", name:"Strength & Conditioning", icon:"wrench", desc:"Off-season, in-season, and conditioning.", showInLibrary:false },
   { id:"hittingworkout", name:"Hitting Workout", icon:"flame", desc:"Build your own session from 6 drill pools.", showInLibrary:false },
 ];
@@ -851,17 +923,129 @@ function discardSwingVideo(){
 /* ---------------------- v3 state: bat program, S&C progress, daily plan --- */
 
 function batKey(){ return "hp_bat_program_" + session.username; }
-function loadBatProgram(){ return JSON.parse(localStorage.getItem(batKey()) || "null") || { started:false, currentWeek:1 }; }
+// v17: restructured from the flat {started,currentWeek} shape to the same
+// {started,week,currentDay,days,sets} shape S&C uses (scTrackDefault), so
+// per-set logging and day-level completion work identically. There's only
+// one track here (no off-season/in-season split), so these live on the
+// object directly instead of nested under a track id.
+function batDefault(){ return { started:false, week:1, currentDay:0, days:{}, sets:{} }; }
+function loadBatProgram(){
+  const raw = JSON.parse(localStorage.getItem(batKey()) || "null");
+  if(!raw) return batDefault();
+  const p = Object.assign(batDefault(), raw);
+  if(raw.currentWeek !== undefined && raw.week === undefined) p.week = raw.currentWeek; // upgrade pre-v17 saves
+  if(!p.days) p.days = {};
+  if(!p.sets) p.sets = {};
+  if(p.currentDay === undefined) p.currentDay = 0;
+  return p;
+}
 function saveBatProgram(p){ localStorage.setItem(batKey(), JSON.stringify(p)); }
-function startBatProgram(){ saveBatProgram({ started:true, currentWeek:1 }); go("bat-program"); }
-function advanceBatWeek(){
-  const p = loadBatProgram();
-  if(p.currentWeek < WEIGHTED_BAT.weeks.length) p.currentWeek += 1;
-  else p.currentWeek = WEIGHTED_BAT.weeks.length + 1; // program complete marker
-  saveBatProgram(p);
+function startBatProgram(){ saveBatProgram({ started:true, week:1, currentDay:0, days:{}, sets:{} }); go("bat-program"); }
+// Mid-block reset — same confirm()-gated pattern as resetScTrack (A-item
+// request: "we need a reset on the weighted bat program").
+function resetBatProgram(){
+  if(!confirm("Reset the Weighted Bat Program? This clears every logged week, day, and set and starts back over from Week 1.")) return;
+  saveBatProgram(batDefault());
+  batViewWeek = null;
+  batViewDay = {};
   go("bat-program");
 }
-function restartBatProgram(){ saveBatProgram({ started:false, currentWeek:1 }); go("bat-program"); }
+// Happy-path reset from the "Block complete" card — no confirm(), mirrors
+// startOverScTrack().
+function startOverBatProgram(){
+  saveBatProgram({ started:true, week:1, currentDay:0, days:{}, sets:{} });
+  batViewWeek = null;
+  batViewDay = {};
+  go("bat-program");
+}
+function batDaysForWeek(week){
+  const w = WEIGHTED_BAT.weeks.find(x => x.wk === week) || WEIGHTED_BAT.weeks[WEIGHTED_BAT.weeks.length-1];
+  return w.days;
+}
+function batMetaForWeek(week){
+  const w = WEIGHTED_BAT.weeks.find(x => x.wk === week) || WEIGHTED_BAT.weeks[WEIGHTED_BAT.weeks.length-1];
+  return { focus: w.focus, testWeek: !!w.testWeek };
+}
+function batSetKey(week, dayIdx, exIdx, setIdx){ return "w"+week+"-d"+dayIdx+"-e"+exIdx+"-s"+setIdx; }
+function getBatSetState(p, week, dayIdx, exIdx, setIdx){
+  return p.sets[batSetKey(week,dayIdx,exIdx,setIdx)] || { weight:"", reps:"", logged:false };
+}
+function updateBatSetField(week, dayIdx, exIdx, setIdx, field, value){
+  const p = loadBatProgram();
+  const key = batSetKey(week,dayIdx,exIdx,setIdx);
+  const cur = p.sets[key] || { weight:"", reps:"", logged:false };
+  cur[field] = value;
+  p.sets[key] = cur;
+  saveBatProgram(p);
+}
+function toggleBatSetLog(week, dayIdx, exIdx, setIdx){
+  const p = loadBatProgram();
+  const key = batSetKey(week,dayIdx,exIdx,setIdx);
+  const cur = p.sets[key] || { weight:"", reps:"", logged:false };
+  cur.logged = !cur.logged;
+  p.sets[key] = cur;
+  saveBatProgram(p);
+  maybeAutoCompleteBatDay(week, dayIdx);
+  go("bat-program");
+}
+function isBatDayDone(p, week, dayIdx){ return !!p.days["w"+week+"-d"+dayIdx+"-DONE"]; }
+function isBatWeekDone(p, week){
+  const days = batDaysForWeek(week);
+  return days.every((d, di) => !!p.days["w"+week+"-d"+di+"-DONE"]);
+}
+function maybeAutoCompleteBatDay(week, dayIdx){
+  const days = batDaysForWeek(week);
+  const p = loadBatProgram();
+  const items = days[dayIdx].items;
+  const allLogged = items.every((item, exIdx) => {
+    const parsed = parseSets(item.sets);
+    for(let s=0;s<parsed.count;s++) if(!getBatSetState(p, week, dayIdx, exIdx, s).logged) return false;
+    return true;
+  });
+  if(allLogged) completeBatDay(week, dayIdx);
+}
+// Same rule as completeDay(): completing a day always logs every set in it;
+// auto-advancing the program's current week/day pointer only happens when
+// the day being completed IS the program's actual current day, not a day
+// you're just reviewing. Callable from either the Weighted Bat Program tab
+// or the Daily Hitting Plan's "Mark Bat Day Complete" button.
+function completeBatDay(week, dayIdx){
+  const days = batDaysForWeek(week);
+  const p = loadBatProgram();
+  const items = days[dayIdx].items;
+  items.forEach((item, exIdx) => {
+    const parsed = parseSets(item.sets);
+    for(let s=0;s<parsed.count;s++){
+      const key = batSetKey(week,dayIdx,exIdx,s);
+      const cur = p.sets[key] || { weight:"", reps:"", logged:false };
+      cur.logged = true;
+      p.sets[key] = cur;
+    }
+  });
+  p.days["w"+week+"-d"+dayIdx+"-DONE"] = true;
+  let advancedWeek = false;
+  let advancedDay = false;
+  if(week === p.week){
+    if(isBatWeekDone(p, week)){
+      if(p.week <= WEIGHTED_BAT.weeks.length){ p.week += 1; p.currentDay = 0; advancedWeek = true; }
+    } else if(dayIdx === p.currentDay){
+      p.currentDay = Math.min(p.currentDay + 1, days.length - 1);
+      advancedDay = true;
+    }
+  }
+  saveBatProgram(p);
+  if(advancedWeek) batViewWeek = null;
+  else if(advancedDay) batViewDay[week] = p.currentDay;
+  go("bat-program");
+  if(advancedWeek) setTimeout(() => showToast("Week complete — moved to Week " + p.week + "."), 10);
+}
+// Which week/day is currently being VIEWED — decoupled from the program's
+// actual progression pointer, same as scViewWeek/scViewDay, so you can
+// browse a past week without it looking like you're "on" it going forward.
+let batViewWeek = null;
+let batViewDay = {};
+function setBatViewWeek(w){ batViewWeek = w; go("bat-program"); }
+function setBatViewDay(week, d){ batViewDay[week] = d; go("bat-program"); }
 
 const SC_TOTAL_WEEKS = { offseason: 12, inseason: null };
 function scKey(){ return "hp_sc_progress_" + session.username; }
@@ -1097,7 +1281,7 @@ function completeHittingSession(){
   log.push({
     date: new Date().toISOString(),
     drillCount: picks.length,
-    batWeek: (bat.started && bat.currentWeek <= WEIGHTED_BAT.weeks.length) ? bat.currentWeek : null,
+    batWeek: (bat.started && bat.week <= WEIGHTED_BAT.weeks.length) ? bat.week : null,
   });
   saveSessionLog(log);
   saveDailyPicks([]);
@@ -1143,9 +1327,21 @@ function toggleWeekly(w){
 
 /* ---------------------- Users / auth ------------------------------------ */
 
+// v17: beta tester accounts (request: "add a login for testers... about
+// ready to give to people to beta test it"). Same shared-password pattern as
+// the existing demo accounts — simplest thing that works for a small,
+// known group of testers Josh hands credentials to directly. Each username
+// is its own localStorage namespace (see session.username usage throughout),
+// so tester1..tester5 automatically get fully separate progress/data with
+// zero extra plumbing — no separate backend needed for this stage.
 const USERS = {
-  josh:    { password:"demo123", role:"coach",  name:"Josh Kalalau" },
-  hitter1: { password:"demo123", role:"hitter", name:"Alex Rivera", programId:"p1" },
+  josh:    { password:"demo123",  role:"coach",  name:"Josh Kalalau" },
+  hitter1: { password:"demo123",  role:"hitter", name:"Alex Rivera", programId:"p1" },
+  tester1: { password:"beta2026", role:"hitter", name:"Beta Tester 1", programId:"p1" },
+  tester2: { password:"beta2026", role:"hitter", name:"Beta Tester 2", programId:"p1" },
+  tester3: { password:"beta2026", role:"hitter", name:"Beta Tester 3", programId:"p1" },
+  tester4: { password:"beta2026", role:"hitter", name:"Beta Tester 4", programId:"p1" },
+  tester5: { password:"beta2026", role:"hitter", name:"Beta Tester 5", programId:"p1" },
 };
 
 /* ---------------------- Program (coach template + hitter view) --------- */
@@ -1314,7 +1510,7 @@ function sampleItemsFor(catId){
   }
   if(catId === "bat"){
     const wk = WEIGHTED_BAT.weeks[0];
-    return [{name:"Week "+wk.wk+" — "+wk.focus, detail:wk.plan}];
+    return wk.days.flatMap(d => d.items.map(i => ({name:i.name, detail:(i.sets||"")+(i.note?" — "+i.note:"")})));
   }
   return [];
 }
@@ -1409,7 +1605,7 @@ function renderStrengthHub(){
       const st = getSetState(p, scTab, viewWeek, di, exIdx, s);
       html += `<div class="set-row">
         <div class="set-num">${s+1}</div>
-        <input type="text" value="${st.weight}" placeholder="—" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'weight',this.value)">
+        <input type="text" inputmode="decimal" value="${st.weight}" placeholder="—" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'weight',this.value)">
         <input type="text" value="${st.reps}" placeholder="${parsed.label}" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'reps',this.value)">
         <div class="log-box ${st.logged?'done':''}" onclick="toggleSetLog('${scTab}',${viewWeek},${di},${exIdx},${s})">${st.logged?icon('check'):''}</div>
       </div>`;
@@ -1524,27 +1720,68 @@ function renderDrillsLibrary(){
 
 function renderBatProgram(){
   const p = loadBatProgram();
+  const totalWeeks = WEIGHTED_BAT.weeks.length;
+
   let html = `<div class="page-head"><h1>Weighted Bat Program</h1><div class="sub">${WEIGHTED_BAT.overview}</div></div>`;
 
   if(!p.started){
-    html += `<div class="card"><div class="card-title" style="margin-bottom:8px;">Start the 6-week block</div><div class="phil-text" style="font-size:13px;margin-bottom:16px;">Once started, this week's bat work is automatically added to your Daily Hitting Plan right after warm-up and tee progressions.</div><button class="btn btn-primary" style="width:auto;padding:11px 22px;" onclick="startBatProgram()">Start Program</button></div>`;
-  } else if(p.currentWeek > WEIGHTED_BAT.weeks.length){
-    html += `<div class="card"><div class="card-title" style="margin-bottom:6px;">Program complete</div><div class="phil-text" style="font-size:13px;margin-bottom:16px;">You finished all ${WEIGHTED_BAT.weeks.length} weeks. Check your Hitting Metrics Dashboard to compare start vs. end numbers.</div><button class="btn btn-ghost" style="width:auto;padding:9px 18px;" onclick="restartBatProgram()">Start a New Block</button></div>`;
-  } else {
-    html += `<div class="hint" style="margin-bottom:14px;">Started — Week ${p.currentWeek} is now included in your Daily Hitting Plan.</div>`;
+    html += `<div class="card"><div class="card-title" style="margin-bottom:8px;">Start the 6-week block</div><div class="phil-text" style="font-size:13px;margin-bottom:16px;">One day at a time, same as Strength & Conditioning — log every set and it advances to the next day, then the next week, on its own. Today's bat day also shows up in your Daily Hitting Plan once started.</div><button class="btn btn-primary" style="width:auto;padding:11px 22px;" onclick="startBatProgram()">Start Program</button></div>`;
+    return html;
   }
 
-  html += WEIGHTED_BAT.weeks.map(w => {
-    const state = !p.started ? "" : (w.wk < p.currentWeek ? "done" : (w.wk === p.currentWeek ? "current" : "future"));
-    return `<div class="card" style="${state==='current' ? 'border-color:var(--accent);' : ''}${state==='future' ? 'opacity:0.55;' : ''}">
-      <div class="card-head"><div class="card-title">Week ${w.wk} — ${w.focus}</div>${state==='done' ? '<span class="pill pill-green">Done</span>' : state==='current' ? '<span class="pill pill-amber">Current</span>' : ''}</div>
-      <div class="phil-text" style="font-size:13px;">${w.plan}</div>
+  html += `<div class="top-actions"><button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:12px;" onclick="resetBatProgram()">Reset Weighted Bat Program</button></div>`;
+
+  const blockDone = p.week > totalWeeks;
+  const maxWeek = blockDone ? totalWeeks : p.week;
+  const viewWeek = (batViewWeek && batViewWeek <= maxWeek) ? batViewWeek : maxWeek;
+
+  if(blockDone){
+    html += `<div class="card"><div class="card-title" style="margin-bottom:6px;">Block complete</div><div class="phil-text" style="font-size:13px;margin-bottom:14px;">You've cleared all ${totalWeeks} weeks. Check your Hitting Metrics Dashboard to compare start vs. end numbers, or start the block over from Week 1.</div><button class="btn btn-primary" style="width:auto;padding:9px 18px;" onclick="startOverBatProgram()">Start Over</button></div>`;
+  }
+
+  html += `<div class="week-tabs" style="margin-bottom:6px;">` + Array.from({length:maxWeek}, (_,i)=>i+1).map(w => {
+    const wDone = isBatWeekDone(p, w);
+    return `<div class="week-tab ${w===viewWeek?'active':''}" onclick="setBatViewWeek(${w})">Week ${w}${wDone?' '+icon('check'):''}</div>`;
+  }).join("") + `</div>`;
+
+  const meta = batMetaForWeek(viewWeek);
+  const days = batDaysForWeek(viewWeek);
+  html += `<div class="card-tag" style="margin-bottom:4px;">${meta.testWeek ? 'Testing Week — ' : ''}${meta.focus}</div>`;
+  html += `<div class="phil-text" style="font-size:12.5px;color:var(--text-dim);margin-bottom:10px;">${meta.testWeek ? 'Blast Motion + radar gun — log to your Hitting Metrics Dashboard.' : ''}${(!blockDone && viewWeek!==p.week) ? ' — viewing a past week' : ''}</div>`;
+
+  const defaultDay = (viewWeek === p.week && !blockDone) ? p.currentDay : 0;
+  const viewDay = (batViewDay[viewWeek] !== undefined) ? batViewDay[viewWeek] : defaultDay;
+
+  html += `<div class="week-tabs" style="margin-bottom:16px;">` + days.map((d, di) => {
+    const dDone = isBatDayDone(p, viewWeek, di);
+    const shortLabel = d.day.split(" — ")[0];
+    return `<div class="week-tab ${di===viewDay?'active':''}" onclick="setBatViewDay(${viewWeek},${di})">${shortLabel}${dDone?' '+icon('check'):''}</div>`;
+  }).join("") + `</div>`;
+
+  const di = viewDay;
+  const d = days[di];
+  const done = isBatDayDone(p, viewWeek, di);
+  html += `<div class="item-block"><div class="item-block-head"><div><h4>${d.day}</h4><div class="meta">${done ? 'Completed' : d.items.length+' exercises'}</div></div>` +
+    `<button class="btn ${done?'btn-ghost':'btn-primary'}" style="width:auto;margin:0;padding:8px 14px;font-size:12px;" onclick="completeBatDay(${viewWeek},${di})">${done ? 'Completed' : 'Mark Day Complete'}</button></div>`;
+  d.items.forEach((item, exIdx) => {
+    const parsed = parseSets(item.sets);
+    html += `<div style="padding:10px 18px 4px;">
+      <div class="label" style="font-weight:600;font-size:13.5px;">${item.name}</div>
+      <div class="desc" style="margin-top:4px;">${item.note||""}</div>
     </div>`;
-  }).join("");
+    html += `<div class="set-row head"><div></div><div>WEIGHT</div><div>REPS</div><div>LOG</div></div>`;
+    for(let s=0; s<parsed.count; s++){
+      const st = getBatSetState(p, viewWeek, di, exIdx, s);
+      html += `<div class="set-row">
+        <div class="set-num">${s+1}</div>
+        <input type="text" inputmode="decimal" value="${st.weight}" placeholder="—" onchange="updateBatSetField(${viewWeek},${di},${exIdx},${s},'weight',this.value)">
+        <input type="text" value="${st.reps}" placeholder="${parsed.label}" onchange="updateBatSetField(${viewWeek},${di},${exIdx},${s},'reps',this.value)">
+        <div class="log-box ${st.logged?'done':''}" onclick="toggleBatSetLog(${viewWeek},${di},${exIdx},${s})">${st.logged?icon('check'):''}</div>
+      </div>`;
+    }
+  });
+  html += `<div style="height:8px;"></div></div>`;
 
-  if(p.started && p.currentWeek <= WEIGHTED_BAT.weeks.length){
-    html += `<button class="btn btn-primary" style="width:auto;padding:10px 20px;" onclick="advanceBatWeek()">Mark Week ${p.currentWeek} Complete</button>`;
-  }
   return html;
 }
 
@@ -1574,9 +1811,16 @@ function renderDailyPlan(){
   html += block("Warm-Up", warmupItems);
   html += block("Tee Progressions", teeItems);
 
-  if(bat.started && bat.currentWeek <= WEIGHTED_BAT.weeks.length){
-    const wk = WEIGHTED_BAT.weeks[bat.currentWeek - 1];
-    html += block("Weighted Bat — Week " + wk.wk + " (" + wk.focus + ")", [wk.plan]);
+  if(bat.started && bat.week <= WEIGHTED_BAT.weeks.length){
+    const batDays = batDaysForWeek(bat.week);
+    const batDayIdx = Math.min(bat.currentDay, batDays.length - 1);
+    const batDay = batDays[batDayIdx];
+    const batDone = isBatDayDone(bat, bat.week, batDayIdx);
+    html += `<div class="section-label">Weighted Bat — Week ${bat.week}, ${batDay.day}</div>`;
+    html += `<div class="item-block"><div style="padding-top:6px;">` +
+      batDay.items.map(it => `<div class="simple-check-row"><span class="label">${it.name} — ${it.sets}</span></div>`).join("") +
+      `</div></div>`;
+    html += `<div style="margin:-8px 0 16px;"><button class="btn ${batDone?'btn-ghost':'btn-primary'}" style="width:auto;padding:8px 14px;font-size:12px;margin:0;" onclick="completeBatDay(${bat.week},${batDayIdx})">${batDone ? 'Bat Day Completed' : 'Mark Bat Day Complete'}</button> <a href="#" onclick="go('bat-program');return false;" style="color:var(--accent);font-size:12px;margin-left:10px;">Log sets in Weighted Bat Program &#8594;</a></div>`;
   } else {
     html += `<div class="section-label">Weighted Bat Program</div><div class="card"><div class="phil-text" style="font-size:12.5px;color:var(--text-dim);">Not started yet — <a href="#" onclick="go('bat-program');return false;" style="color:var(--accent);">start the program</a> to have it added here automatically.</div></div>`;
   }
@@ -1675,7 +1919,9 @@ function renderCategory(id){
       }).join("");
   } else if(id === "bat"){
     body = `<div class="card"><div class="phil-text">${WEIGHTED_BAT.overview}</div></div>`;
-    body += WEIGHTED_BAT.weeks.map(w => `<div class="card"><div class="card-head"><div class="card-title">Week ${w.wk} — ${w.focus}</div></div><div class="phil-text" style="font-size:13px;">${w.plan}</div></div>`).join("");
+    body += WEIGHTED_BAT.weeks.map(w => `<div class="card"><div class="card-head"><div class="card-title">Week ${w.wk} — ${w.focus}</div></div>` +
+      w.days.map(d => `<div class="phil-text" style="font-size:13px;margin-top:6px;"><b>${d.day}:</b> ` + d.items.map(i => i.name+" ("+i.sets+")").join(", ") + `</div>`).join("") +
+      `</div>`).join("");
   }
   return `<div class="page-head"><div class="crumbs"><a href="#" onclick="go('library');return false;" style="color:var(--text-mute);">Training Library</a> / ${cat.name}</div><h1>${cat.name}</h1><div class="sub">${cat.desc}</div></div>${body}`;
 }
