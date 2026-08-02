@@ -707,79 +707,115 @@ function scBlockMetaForWeek(track, week){
   return { focus: blocks[idx].focus, label: blocks[idx].label, weekInBlock, blockIndex: idx };
 }
 
-// Weighted Bat Program — 6-week overload/underload bat speed block. v17:
-// restructured from flat week-level focus/plan text (no day or set
-// breakdown) to the same week -> day -> set-by-set model Strength &
-// Conditioning uses, so it can log real weight/reps per set and mark days
-// complete the same way S&C does. Content keeps the original overload/
-// underload/contrast progression and test-week placement (baseline Week 1,
-// mid Week 3, end Week 6) — now split into 2 training days per week.
+// Weighted Bat Program — v20: replaced with the real program content Josh
+// supplied from the Hitting Philosophy Doc's Weighted Bat Program tab
+// (source-tagged [VIDEO]/[RESEARCH] per section — see WEIGHTED_BAT_NOTES
+// below; the Puck Knob section was explicitly excluded per Josh's request).
+// This is a standalone 6-week block, not tied to a specific off-season/
+// in-season week, run with a fixed 5-bat set (72/66/45/24/16 oz) for both
+// HS and college/adult hitters. Structure: 3 sessions/week (Day 1-3, meant
+// for non-consecutive days), every session runs all 5 bats heavy-to-light
+// at 3x10 each. The week -> day -> set-by-set shape matches S&C so it logs
+// weight/reps/completion the same way. Weeks 1-2 = Foundation (mechanics
+// under load), Weeks 3-4 = Build (start tracking bat speed/EV at the 45oz
+// and 16oz ends), Weeks 5-6 = Transfer (add a game-bat contrast-finish set
+// after the 16oz bat, every session). The week's 3rd session also adds one
+// weighted-training-ball add-on set, per the "once a week, after the bat
+// progression" guidance.
+const BAT_LADDER = [
+  { name:"72 oz Bat — Heaviest Overload", note:"Pure force production — tee only. Bat speed will be drastically slower than game speed; that's expected, not a problem. Controlled reps — maintain the same swing path and posture as the game swing rather than muscling the bat through." },
+  { name:"66 oz Bat — Sub-Max Overload", note:"Bridge weight between the heaviest bat and moderate overload — tee only. Watch for the swing path starting to look like the hitter's actual swing again at this weight, rather than a grind." },
+  { name:"45 oz Bat — Moderate Overload", note:"Roughly 1.5x a typical adult game bat's weight. Tee or flips. Usually the first bat in the progression light enough to feel bat speed building rather than just load." },
+  { name:"24 oz Bat — Light Underload", note:"At or just under a typical HS/college game bat's weight. Flips are appropriate here. Intent shifts to fast hands and quick bat-to-ball." },
+  { name:"16 oz Bat — Extreme Underload", note:"Trains maximum bat speed and CNS firing rate. Flips or fast front toss. Watch closely for overswinging, flying open early, or losing the back side." },
+];
+function batBuildDay(dayLabel, phase, isThirdSession){
+  const items = BAT_LADDER.map(b => ({ name:b.name, sets:"3x10", note:b.note }));
+  if(phase === "build"){
+    items[2].note += " Start tracking bat speed/exit velo here (radar, HitTrax, or a bat sensor) to establish a baseline.";
+    items[4].note += " Track bat speed/exit velo here too — this is the other baseline point for the block.";
+  }
+  if(phase === "transfer"){
+    items.push({ name:"Game Bat — Contrast Finish", sets:"1x10", note:"Immediately after the 16 oz bat, every session — light bat into game-weight bat. This is the step that turns trained speed into game-bat feel." });
+  }
+  if(isThirdSession){
+    items.push({ name:"Weighted Training Ball Work (Game Bat)", sets:"3x6-8", note:"Once a week, this session only, after the bat progression is complete — solid contacts off tee/soft toss with a 15-32oz weighted training ball, using the normal game bat, not an overload bat. Keep volume low (more than ~12 contacts adds injury risk without added benefit) and never stack a heavy bat and a heavy ball in the same rep." });
+  }
+  return { day:dayLabel, items };
+}
+function batBuildWeek(wk, focus, phase){
+  return { wk, focus, phase, days:[ batBuildDay("Day 1", phase, false), batBuildDay("Day 2", phase, false), batBuildDay("Day 3", phase, true) ] };
+}
 const WEIGHTED_BAT = {
-  overview: "6-week overload/underload bat speed block, 2 sessions a week. Test at start (Week 1), mid (Week 3), and end (Week 6) using Blast Motion + radar gun. Deload automatically triggered by 3 consecutive session declines in bat speed.",
+  overview: "A standalone 6-week overload/underload bat speed block — run it any time, not tied to a specific off-season or in-season week. 3 sessions a week (ideally non-consecutive days), same 5-bat set (72/66/45/24/16 oz) for HS and college/adult hitters alike — coaches working with smaller or younger high schoolers should read the Safety notes closely, since 72 oz is well over double a typical HS game bat.",
   weeks: [
-    { wk:1, focus:"Baseline + Overload Introduction", testWeek:true, days:[
-      { day:"Day 1 — Baseline Test", items:[
-        { name:"Bat Speed Baseline Test", sets:"3x5", note:"Blast Motion + radar gun, full-effort tee swings — log the number, this is your Week 1/3/6 comparison point" },
-        { name:"Standard Bat Tee Work", sets:"3x10", note:"Normal bat weight, standard tee progression pace" },
-      ]},
-      { day:"Day 2 — Overload Introduction", items:[
-        { name:"Heavy Bat Dry Swings (+3-5oz)", sets:"3x5", note:"No ball — pattern work only, stay on time and don't rush to compensate for the extra weight" },
-        { name:"Standard Bat Tee Work", sets:"3x10" },
-      ]},
-    ]},
-    { wk:2, focus:"Overload Volume Up", testWeek:false, days:[
-      { day:"Day 1 — Heavy Bat Emphasis", items:[
-        { name:"Heavy Bat Dry Swings (+3-5oz)", sets:"4x5" },
-        { name:"Standard Bat Tee Work", sets:"3x10" },
-      ]},
-      { day:"Day 2 — Overload + Light Intro", items:[
-        { name:"Heavy Bat Dry Swings (+3-5oz)", sets:"3x5" },
-        { name:"Light Bat Flips (-3oz)", sets:"2x8" },
-        { name:"Standard Bat Tee Work", sets:"3x10" },
-      ]},
-    ]},
-    { wk:3, focus:"MID TEST", testWeek:true, days:[
-      { day:"Day 1 — Mid Test", items:[
-        { name:"Bat Speed Mid Test", sets:"3x5", note:"Blast Motion + radar gun — compare directly to Week 1 baseline, log to Dashboard" },
-        { name:"Standard Bat Tee Work", sets:"3x10" },
-      ]},
-      { day:"Day 2 — Recovery / Light Volume", items:[
-        { name:"Light Bat Flips (-3oz)", sets:"3x8" },
-        { name:"Standard Bat Tee Work", sets:"2x10" },
-      ]},
-    ]},
-    { wk:4, focus:"Underload Emphasis", testWeek:false, days:[
-      { day:"Day 1 — Light Bat Emphasis", items:[
-        { name:"Light Bat Dry Swings (-3oz)", sets:"4x6" },
-        { name:"Standard Bat Live BP", sets:"3x10" },
-      ]},
-      { day:"Day 2 — Underload + Standard", items:[
-        { name:"Light Bat Dry Swings (-3oz)", sets:"3x6" },
-        { name:"Standard Bat Live BP", sets:"3x10" },
-      ]},
-    ]},
-    { wk:5, focus:"Contrast (Heavy/Light Superset)", testWeek:false, days:[
-      { day:"Day 1 — Contrast Pairs", items:[
-        { name:"Heavy-Light Contrast Pairs (+3-5oz / -3oz)", sets:"4x(3+3)", note:"Alternate one heavy-bat rep then one light-bat rep, immediately back to back" },
-        { name:"Standard Bat Game-Speed BP", sets:"3x10" },
-      ]},
-      { day:"Day 2 — Contrast + Tee", items:[
-        { name:"Heavy-Light Contrast Pairs (+3-5oz / -3oz)", sets:"3x(3+3)" },
-        { name:"Standard Bat Tee Work", sets:"3x10" },
-      ]},
-    ]},
-    { wk:6, focus:"END TEST", testWeek:true, days:[
-      { day:"Day 1 — End Test", items:[
-        { name:"Bat Speed End Test", sets:"3x5", note:"Blast Motion + radar gun — compare to baseline + mid, decide next block" },
-        { name:"Standard Bat Tee Work", sets:"3x10" },
-      ]},
-      { day:"Day 2 — Confirmation", items:[
-        { name:"Bat Speed Confirmation Test", sets:"2x5" },
-        { name:"Standard Bat Live BP", sets:"3x10" },
-      ]},
-    ]},
+    batBuildWeek(1, "Foundation — Mechanics Under Load (Week 1 of 2)", "foundation"),
+    batBuildWeek(2, "Foundation — Mechanics Under Load (Week 2 of 2)", "foundation"),
+    batBuildWeek(3, "Build — Establish a Bat Speed Baseline (Week 1 of 2)", "build"),
+    batBuildWeek(4, "Build — Establish a Bat Speed Baseline (Week 2 of 2)", "build"),
+    batBuildWeek(5, "Transfer — Contrast Finish to Game Bat (Week 1 of 2)", "transfer"),
+    batBuildWeek(6, "Transfer — Contrast Finish to Game Bat (Week 2 of 2)", "transfer"),
   ]
 };
+// Reference material from the Doc's Weighted Bat Program tab — shown as a
+// collapsible "Program Notes & Safety" card at the top of the tab (see
+// renderBatProgram) rather than folded into the day-by-day view, so the
+// workout screen stays scannable but the coaching rationale isn't lost.
+// Puck Knob Counterweighting section intentionally excluded per Josh.
+const WEIGHTED_BAT_NOTES = [
+  { tag:"RESEARCH", h:"Program Philosophy — Why Overload/Underload Works", body:
+`Overload (the heavier bats) trains force production — swinging a heavier implement against the same swing pattern forces the muscles and connective tissue involved in the swing to produce more force than a game bat ever asks for, which is the strength half of bat speed.
+
+Underload (the lighter bats) trains rate of force development — a lighter implement lets the same muscles move through the same pattern faster than a game bat allows, which trains the nervous system to fire that pattern quickly. Coop DeRenne's foundational research (1995, Journal of Strength and Conditioning Research) established this overload/underload framework and is the basis for most bat-speed training used today.
+
+Neither half works alone. Overload without underload builds strength that never gets expressed as speed; underload without overload has nothing extra to speed up. The two are trained together, in the same session, for a reason.
+
+VELO Sports and Dr. Tyler Standifird's data (ABCA Webinar, October 2024) found hitters average roughly a 6% bat speed gain in the first six weeks of structured overload/underload training — which is the direct evidence behind this program's 6-week length.` },
+  { tag:"VIDEO, Joe Kelch, Northern Illinois Univ.", h:"Weekly Structure", body:
+`3 sessions per week, ideally on non-consecutive days (for example Monday/Wednesday/Friday), so the forearms and wrists get a full day of recovery between sessions.
+
+Each session runs about 45 minutes and consists of 3 sets of 10 swings on each of the 5 bats in the progression — 150 total swings per session, 450 per week.
+
+Swings can be taken off a tee or on soft-toss/flips. Tee work is required for the two heaviest bats (see Safety section below); flips are appropriate once the hitter is on the lighter end of the progression and mechanics are holding up.
+
+The block runs 6 straight weeks, then stops. This is a discrete training cycle, not a year-round daily habit — re-running it back-to-back without a break risks the same overuse issues as any other high-volume implement training.` },
+  { tag:"VIDEO, Joe Kelch, Northern Illinois Univ.", h:"The 5-Bat Progression", body:
+`72 oz (heaviest overload): pure force production. Bat speed will be drastically slower than game speed — that's expected, not a problem. Tee only, controlled reps, focus on maintaining the same swing path and posture as the game swing rather than muscling the bat through any way possible.
+
+66 oz (sub-max overload): a bridge weight between the heaviest bat and moderate overload. Still tee-only. Coaches should watch for the swing path starting to look like the hitter's actual swing again at this weight, rather than a grind.
+
+45 oz (moderate overload): roughly 1.5x a typical adult game bat's weight. Tee or flips. This is usually the first bat in the progression light enough that a hitter can start to feel bat speed building rather than just load.
+
+24 oz (light underload): at or just under a typical high school/college game bat's weight. Flips are appropriate here. Intent shifts to fast hands and quick bat-to-ball — this is where "fast" starts to feel different from "heavy done quickly."
+
+16 oz (extreme underload): trains maximum bat speed and CNS firing rate. Flips or fast front toss. This is the bat most likely to expose mechanical breakdown — watch closely for overswinging, flying open early, or losing the back side, since the light weight makes it easy to swing hard with bad posture and not feel it.` },
+  { tag:"RESEARCH", h:"Bat Order & 6-Week Emphasis", body:
+`Every session runs the bats heavy to light: 72 → 66 → 45 → 24 → 16 oz. This order primes force production first, while the nervous system is fresh, then transitions into speed work — running it in reverse would ask for max-speed output on a fatigued CNS.
+
+Weeks 1-2 (Foundation): the coaching focus is mechanics under load — does the swing path, posture, and sequencing on the 72 and 66 oz bats still resemble the hitter's real swing, or has it broken down into an arm-only heave? Fix this before adding any speed emphasis.
+
+Weeks 3-4 (Build): once the heavy-bat mechanics are sound, start tracking bat speed or exit velocity (radar, HitTrax, or a bat sensor if available) at the 45 oz and 16 oz ends of the progression to establish a baseline for whether the block is working.
+
+Weeks 5-6 (Transfer): add 10 swings on the hitter's actual game bat immediately after the 16 oz bat, every session. This contrast finish (light bat into game-weight bat) is when the speed trained in the light bats should start to show up as game-bat feel — it's the step that turns a training effect into a swing.` },
+  { tag:"RESEARCH", h:"Weighted Training Ball Companion Work", body:
+`The logic: overload/underload bat work trains the implement side of the kinetic chain. Weighted training balls (Total Control Balls, Tanner-style balls, or similar — typically 15-32 oz versus a regulation ball's roughly 5 oz) train the impact side, forcing the hitter to deliver force through a heavier target and build extension through the zone. This is the same mechanism DeRenne validated for throwing (his 1990 research found overweight and underweight baseballs increased throwing velocity by 3.75 mph and 4.72 mph respectively over a training cycle).
+
+Add it once per week, on the week's third session, after the bat progression is complete: 3 sets of 6-8 solid contacts off a tee or soft toss with a weighted training ball, using the hitter's normal game bat — not one of the overload bats.
+
+Keep volume low. This is a strength and extension stimulus, not a rep-count drill — more than about 12 contacts per session adds injury risk to the hands and wrists without adding training benefit.
+
+Never stack a heavy bat and a heavy ball in the same rep. The weighted-ball work isolates the ball side of the equation; combining it with an overload bat compounds joint stress for no clear benefit and isn't supported by any of the research reviewed for this program.` },
+  { tag:"RESEARCH", h:"Safety, Volume & Load Management", body:
+`The 72 oz and 66 oz bats are tee-only, never live pitching or flips. A heavy implement moving through a full swing at a moving target is a different (and higher) injury risk than the same bat on a stationary ball.
+
+Any wrist, forearm, or elbow discomfort stops that session's progression at the bat being swung when it starts — it does not get pushed through. A hitter can resume the next scheduled session if the discomfort has cleared.
+
+Deload rule: if measured bat speed at the 16 oz end of the progression declines for two consecutive sessions, cut that week's volume (drop to 2 sets instead of 3) rather than continue pushing full volume into a fatigued system.
+
+This program is a discrete 6-week cycle. Once it's complete, the block ends — give the hitter a break before running it again, the same way the off-season strength blocks aren't run 52 weeks a year.
+
+High school coaches in particular: the 72 oz bat is roughly 2.3-2.4x a typical high school game bat's weight (most HS game bats sit around 30-31 oz). Watch smaller or less physically mature athletes especially closely on the two heaviest bats — if the swing mechanics are breaking down badly at 72 oz despite coaching cues, it is reasonable to start that athlete's block at 66 oz instead and add the 72 oz bat once base strength catches up.` },
+];
 
 const CATEGORIES = [
   { id:"philosophy", name:"Culture & Philosophy", icon:"target", desc:"Our vision, values, and why the program is built this way.", showInLibrary:true },
@@ -973,8 +1009,13 @@ function batDaysForWeek(week){
 }
 function batMetaForWeek(week){
   const w = WEIGHTED_BAT.weeks.find(x => x.wk === week) || WEIGHTED_BAT.weeks[WEIGHTED_BAT.weeks.length-1];
-  return { focus: w.focus, testWeek: !!w.testWeek };
+  return { focus: w.focus, phase: w.phase };
 }
+const BAT_PHASE_SUB = {
+  foundation: "Mechanics under load — the swing path, posture, and sequencing on the 72/66 oz bats should still resemble the hitter's real swing.",
+  build: "Track bat speed or exit velo at the 45 oz and 16 oz ends of the ladder to establish a baseline for the block.",
+  transfer: "Game-bat contrast finish added after the 16 oz bat, every session — this is where trained speed should start to show up as game-bat feel.",
+};
 function batSetKey(week, dayIdx, exIdx, setIdx){ return "w"+week+"-d"+dayIdx+"-e"+exIdx+"-s"+setIdx; }
 function getBatSetState(p, week, dayIdx, exIdx, setIdx){
   return p.sets[batSetKey(week,dayIdx,exIdx,setIdx)] || { weight:"", reps:"", logged:false };
@@ -1055,6 +1096,10 @@ let batViewWeek = null;
 let batViewDay = {};
 function setBatViewWeek(w){ batViewWeek = w; go("bat-program"); }
 function setBatViewDay(week, d){ batViewDay[week] = d; go("bat-program"); }
+// v20: collapsed by default so the workout view stays the default landing
+// state; toggled open on demand to read the Program Notes & Safety card.
+let batNotesOpen = false;
+function toggleBatNotes(){ batNotesOpen = !batNotesOpen; go("bat-program"); }
 
 const SC_TOTAL_WEEKS = { offseason: 12, inseason: null };
 function scKey(){ return "hp_sc_progress_" + session.username; }
@@ -1733,6 +1778,15 @@ function renderBatProgram(){
 
   let html = `<div class="page-head"><h1>Weighted Bat Program</h1><div class="sub">${WEIGHTED_BAT.overview}</div></div>`;
 
+  // v20: collapsible reference card for the real program content (philosophy,
+  // weekly structure, 5-bat progression, safety) — shown on every state
+  // (not-started included) since it's useful reading before a hitter even
+  // starts the block, not just while logging sets.
+  html += `<div class="card" style="margin-bottom:16px;">
+    <div class="card-head"><div class="card-title">Program Notes &amp; Safety</div><button class="btn btn-ghost" style="width:auto;padding:6px 12px;font-size:12px;" onclick="toggleBatNotes()">${batNotesOpen ? 'Hide' : 'Show'}</button></div>
+    ${batNotesOpen ? WEIGHTED_BAT_NOTES.map(n => `<div style="margin-top:16px;"><div class="card-tag">${n.tag}</div><div class="card-title" style="font-size:14px;margin:4px 0 6px;">${n.h}</div><div class="phil-text">${n.body}</div></div>`).join("") : ""}
+  </div>`;
+
   if(!p.started){
     html += `<div class="card"><div class="card-title" style="margin-bottom:8px;">Start the 6-week block</div><div class="phil-text" style="font-size:13px;margin-bottom:16px;">One day at a time, same as Strength & Conditioning — log every set and it advances to the next day, then the next week, on its own. Today's bat day also shows up in your Daily Hitting Plan once started.</div><button class="btn btn-primary" style="width:auto;padding:11px 22px;" onclick="startBatProgram()">Start Program</button></div>`;
     return html;
@@ -1755,8 +1809,8 @@ function renderBatProgram(){
 
   const meta = batMetaForWeek(viewWeek);
   const days = batDaysForWeek(viewWeek);
-  html += `<div class="card-tag" style="margin-bottom:4px;">${meta.testWeek ? 'Testing Week — ' : ''}${meta.focus}</div>`;
-  html += `<div class="phil-text" style="font-size:12.5px;color:var(--text-dim);margin-bottom:10px;">${meta.testWeek ? 'Blast Motion + radar gun — log to your Hitting Metrics Dashboard.' : ''}${(!blockDone && viewWeek!==p.week) ? ' — viewing a past week' : ''}</div>`;
+  html += `<div class="card-tag" style="margin-bottom:4px;">${meta.focus}</div>`;
+  html += `<div class="phil-text" style="font-size:12.5px;color:var(--text-dim);margin-bottom:10px;">${BAT_PHASE_SUB[meta.phase] || ''}${(!blockDone && viewWeek!==p.week) ? ' — viewing a past week' : ''}</div>`;
 
   const defaultDay = (viewWeek === p.week && !blockDone) ? p.currentDay : 0;
   const viewDay = (batViewDay[viewWeek] !== undefined) ? batViewDay[viewWeek] : defaultDay;
