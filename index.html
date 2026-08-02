@@ -52,13 +52,14 @@ input,select{font-family:inherit;}
    from blue-top-design-system.css Section 3 (Option A: layered CSS
    gradients, no image asset). Sits behind nav content via z-index. */
 .sidebar::before{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:0.09;
+  content:"";position:absolute;inset:0;pointer-events:none;
   background-image:
-    repeating-linear-gradient(45deg, rgba(201,162,39,0.9) 0px, rgba(201,162,39,0.9) 3px, transparent 3px, transparent 12px),
-    repeating-linear-gradient(-45deg, rgba(139,94,40,0.9) 0px, rgba(139,94,40,0.9) 3px, transparent 3px, transparent 12px),
-    repeating-linear-gradient(45deg, rgba(0,0,0,0.6) 0px, rgba(0,0,0,0.6) 1px, transparent 1px, transparent 12px);
-  background-blend-mode:overlay, overlay, multiply;
-  background-size:14px 14px;
+    linear-gradient(rgba(5,6,10,0.4),rgba(5,6,10,0.4)),
+    url('weave-bg.jpg');
+  background-blend-mode:multiply, normal;
+  background-size:cover, 260px auto;
+  background-repeat:no-repeat, repeat;
+  opacity:0.5;
 }
 .sidebar #nav-items,.sidebar .nav-spacer,.sidebar .sidebar-foot{position:relative;z-index:1;}
 .sidebar .brand{display:flex;align-items:center;gap:10px;padding:0 8px 22px 8px;border-bottom:1px solid var(--border);margin-bottom:14px;position:relative;z-index:1;}
@@ -81,13 +82,14 @@ input,select{font-family:inherit;}
   background:var(--panel);border-bottom:1px solid var(--border);
 }
 .page-head::before{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:0.09;
+  content:"";position:absolute;inset:0;pointer-events:none;
   background-image:
-    repeating-linear-gradient(45deg, rgba(201,162,39,0.9) 0px, rgba(201,162,39,0.9) 3px, transparent 3px, transparent 12px),
-    repeating-linear-gradient(-45deg, rgba(139,94,40,0.9) 0px, rgba(139,94,40,0.9) 3px, transparent 3px, transparent 12px),
-    repeating-linear-gradient(45deg, rgba(0,0,0,0.6) 0px, rgba(0,0,0,0.6) 1px, transparent 1px, transparent 12px);
-  background-blend-mode:overlay, overlay, multiply;
-  background-size:14px 14px;
+    linear-gradient(rgba(5,6,10,0.4),rgba(5,6,10,0.4)),
+    url('weave-bg.jpg');
+  background-blend-mode:multiply, normal;
+  background-size:cover, 260px auto;
+  background-repeat:no-repeat, repeat;
+  opacity:0.5;
 }
 .page-head > *{position:relative;z-index:1;}
 .page-head h1{font-size:21px;margin:0 0 4px;font-weight:900;text-transform:uppercase;letter-spacing:0.05em;}
