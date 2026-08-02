@@ -53,13 +53,10 @@ input,select{font-family:inherit;}
    gradients, no image asset). Sits behind nav content via z-index. */
 .sidebar::before{
   content:"";position:absolute;inset:0;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(5,6,10,0.4),rgba(5,6,10,0.4)),
-    url('weave-bg.jpg');
-  background-blend-mode:multiply, normal;
-  background-size:cover, 260px auto;
-  background-repeat:no-repeat, repeat;
-  opacity:0.5;
+  background-image:url('weave-bg2.png');
+  background-size:150px 150px;
+  background-repeat:repeat;
+  opacity:0.85;
 }
 .sidebar #nav-items,.sidebar .nav-spacer,.sidebar .sidebar-foot{position:relative;z-index:1;}
 .sidebar .brand{display:flex;align-items:center;gap:10px;padding:0 8px 22px 8px;border-bottom:1px solid var(--border);margin-bottom:14px;position:relative;z-index:1;}
@@ -83,13 +80,10 @@ input,select{font-family:inherit;}
 }
 .page-head::before{
   content:"";position:absolute;inset:0;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(5,6,10,0.4),rgba(5,6,10,0.4)),
-    url('weave-bg.jpg');
-  background-blend-mode:multiply, normal;
-  background-size:cover, 260px auto;
-  background-repeat:no-repeat, repeat;
-  opacity:0.5;
+  background-image:url('weave-bg2.png');
+  background-size:150px 150px;
+  background-repeat:repeat;
+  opacity:0.85;
 }
 .page-head > *{position:relative;z-index:1;}
 .page-head h1{font-size:21px;margin:0 0 4px;font-weight:900;text-transform:uppercase;letter-spacing:0.05em;}
