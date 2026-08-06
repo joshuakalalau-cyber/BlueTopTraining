@@ -56,6 +56,19 @@ input,select{font-family:inherit;}
 .disclaimer-note p{margin:0;color:var(--text);font-size:12.5px;}
 .disclaimer-inline{font-size:12px;color:var(--text-dim);background:rgba(255,87,34,0.07);border:1px solid var(--accent-dim);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.5;}
 
+/* ---------- Exercise swap sheet (v24) ---------- */
+.swap-btn{flex-shrink:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;}
+.swap-btn svg{width:16px;height:16px;}
+.swap-btn:hover{border-color:var(--accent);color:var(--accent);}
+#swap-sheet{position:fixed;inset:0;z-index:998;display:none;align-items:flex-end;justify-content:center;background:rgba(6,11,24,0.75);}
+#swap-sheet.active{display:flex;}
+.swap-sheet-card{width:100%;max-width:480px;max-height:70vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:18px 18px 24px;}
+.swap-sheet-title{font-size:13px;color:var(--text-mute);margin-bottom:10px;}
+.swap-option{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:12px 10px;border-radius:8px;border:none;background:transparent;color:var(--text);font-size:14px;font-weight:600;}
+.swap-option:hover{background:var(--panel2);}
+.swap-option.selected{color:var(--accent);}
+.swap-sheet-close{width:100%;margin-top:8px;}
+
 /* ---------- App shell ---------- */
 #app-shell{display:none;min-height:100vh;}
 #app-shell.active{display:flex;}
@@ -292,11 +305,6 @@ input,select{font-family:inherit;}
       <input type="password" id="login-pass" placeholder="demo123">
     </div>
     <button class="btn btn-primary" onclick="doLogin()">Log in</button>
-    <div class="demo-row">
-      <button class="btn btn-ghost" onclick="quickLogin('josh')">Demo: coach</button>
-      <button class="btn btn-ghost" onclick="quickLogin('hitter1')">Demo: hitter</button>
-    </div>
-    <div class="login-note">Prototype login — no real signup yet.<br>Coach: josh / demo123 &nbsp;·&nbsp; Hitter: hitter1 / demo123<br>Beta testers: tester1&ndash;tester5 / beta2026 — each username keeps its own separate progress.</div>
   </div>
 </div>
 
@@ -309,6 +317,10 @@ input,select{font-family:inherit;}
     <p>By continuing, you confirm you understand these risks and are choosing to participate at your own discretion.</p>
     <button class="btn btn-primary" onclick="ackDisclaimer()">I Understand — Continue</button>
   </div>
+</div>
+
+<div id="swap-sheet">
+  <div class="swap-sheet-card" id="swap-sheet-body"></div>
 </div>
 
 <div id="app-shell">
@@ -348,6 +360,7 @@ const ICONS = {
   target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
   flame:'<path d="M12 2s6 5 6 11a6 6 0 1 1-12 0c0-2 1-3 2-4 .5 2 1.5 2.5 1.5 2.5C9 8 10 4 12 2z"/>',
   play:'<circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/>',
+  refresh:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
 };
 function icon(name){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg>'; }
 
@@ -1162,9 +1175,19 @@ function saveScProgress(p){ localStorage.setItem(scKey(), JSON.stringify(p)); }
 function startScTrack(track, trainingAge){
   const p = loadScProgress();
   p[track].started = true;
-  if(track === "offseason") p[track].trainingAge = trainingAge || "experienced";
+  // v24: no more blocking training-age question before Start — defaults
+  // silently to the safer/capped RIR wave ("new") unless the athlete has
+  // already set their real training experience in Profile. See
+  // setTrainingAge() for the one-line, editable-anytime version of this.
+  if(track === "offseason" && !p[track].trainingAge) p[track].trainingAge = trainingAge || "new";
   saveScProgress(p);
   go("strength-hub");
+}
+function setTrainingAge(age){
+  const p = loadScProgress();
+  p.offseason.trainingAge = age;
+  saveScProgress(p);
+  go("profile");
 }
 function resetScTrack(track){
   const label = SC_TABS.find(t => t.id === track).label;
@@ -1221,6 +1244,50 @@ function toggleSetLog(track, week, dayIdx, exIdx, setIdx){
   const cur = p[track].sets[key] || { weight:"", reps:"", logged:false };
   cur.logged = !cur.logged;
   p[track].sets[key] = cur;
+  saveScProgress(p);
+  maybeAutoCompleteDay(track, week, dayIdx);
+  go("strength-hub");
+}
+
+// v24: simplified S&C logging — one weight field + a "same reps as
+// prescribed" default per exercise, replacing the old parsed.count-row grid
+// (was 3-5 rows of weight+reps+checkbox per exercise, every day, for 12
+// straight weeks). Under the hood these still write every underlying set
+// slot with the same values, so maybeAutoCompleteDay's per-set check keeps
+// working exactly as before — this only changes what the athlete sees and
+// types, not the data model. Bat Program logging is untouched (still
+// per-set) per Josh's call to scope this to S&C only.
+function quickSetWeight(track, week, dayIdx, exIdx, count, value){
+  const p = loadScProgress();
+  for(let s=0; s<count; s++){
+    const key = setKey(track,week,dayIdx,exIdx,s);
+    const cur = p[track].sets[key] || { weight:"", reps:"", logged:false };
+    cur.weight = value;
+    p[track].sets[key] = cur;
+  }
+  saveScProgress(p);
+}
+function quickSetReps(track, week, dayIdx, exIdx, count, value){
+  const p = loadScProgress();
+  for(let s=0; s<count; s++){
+    const key = setKey(track,week,dayIdx,exIdx,s);
+    const cur = p[track].sets[key] || { weight:"", reps:"", logged:false };
+    cur.reps = value;
+    p[track].sets[key] = cur;
+  }
+  saveScProgress(p);
+}
+function quickToggleLog(track, week, dayIdx, exIdx, count, defaultReps){
+  const p = loadScProgress();
+  const key0 = setKey(track,week,dayIdx,exIdx,0);
+  const nowLogged = !(p[track].sets[key0] && p[track].sets[key0].logged);
+  for(let s=0; s<count; s++){
+    const key = setKey(track,week,dayIdx,exIdx,s);
+    const cur = p[track].sets[key] || { weight:"", reps:"", logged:false };
+    cur.logged = nowLogged;
+    if(nowLogged && !cur.reps) cur.reps = defaultReps;
+    p[track].sets[key] = cur;
+  }
   saveScProgress(p);
   maybeAutoCompleteDay(track, week, dayIdx);
   go("strength-hub");
@@ -1297,6 +1364,35 @@ function completeDay(track, week, dayIdx){
 function swapKey(track, dayIdx, exIdx){ return "hp_sc_swap_" + session.username + "_" + track + "-d" + dayIdx + "-e" + exIdx; }
 function getSwappedName(track, dayIdx, exIdx, defaultName){ return localStorage.getItem(swapKey(track,dayIdx,exIdx)) || defaultName; }
 function setSwap(track, dayIdx, exIdx, name){ localStorage.setItem(swapKey(track,dayIdx,exIdx), name); go("strength-hub"); }
+
+// v24: the exercise-swap control used to be a persistent <select> sitting on
+// every single exercise row, competing visually with the weight/rep inputs
+// on every row of every day. Same underlying options, but now it's a single
+// tap-to-open sheet — swapOptionsCache is filled in during renderStrengthHub()
+// (one entry per rendered row) so openSwapSheet doesn't need to recompute
+// week/day context, just look up what's already on screen.
+let swapOptionsCache = {};
+let swapSheetCtx = null;
+function openSwapSheet(cacheKey){
+  const ctx = swapOptionsCache[cacheKey];
+  if(!ctx) return;
+  swapSheetCtx = ctx;
+  const body = document.getElementById("swap-sheet-body");
+  body.innerHTML = `<div class="swap-sheet-title">Swap "${ctx.baseName}" for —</div>` +
+    ctx.options.map(o => `<button class="swap-option ${o===ctx.effectiveName?'selected':''}" onclick="chooseSwap('${o.replace(/'/g,"\\'")}')">${o}${o===ctx.effectiveName?' '+icon('check'):''}</button>`).join("") +
+    `<button class="btn btn-ghost swap-sheet-close" onclick="closeSwapSheet()">Cancel</button>`;
+  document.getElementById("swap-sheet").classList.add("active");
+}
+function closeSwapSheet(){
+  document.getElementById("swap-sheet").classList.remove("active");
+  swapSheetCtx = null;
+}
+function chooseSwap(name){
+  if(!swapSheetCtx) return;
+  const { scTab, di, exIdx } = swapSheetCtx;
+  closeSwapSheet();
+  setSwap(scTab, di, exIdx, name);
+}
 
 // Which week is currently being VIEWED per track — decoupled from the
 // track's actual progression pointer so you can browse/edit a past week
@@ -1524,14 +1620,33 @@ function ackDisclaimer(){
 
 /* ---------------------- Nav / router --------------------------------------- */
 
+// v24: collapsed from 6 primary tabs to 3 per the simplification pressure
+// test — S&C and the Weighted Bat Program now live under one "Progress" tab
+// (see renderProgress()/progressTab), Drills is reachable from Today instead
+// of its own tab, and Offseason Builder (a placeholder that went nowhere) is
+// dropped from nav entirely. The underlying render functions and the
+// "drills-library"/"offseason-builder" routes are untouched — still reachable
+// by go(), just not surfaced as top-level destinations.
 const NAV = [
-  { id:"daily-plan", label:"Daily Hitting Plan", shortLabel:"Today", icon:"calendar" },
-  { id:"strength-hub", label:"Strength & Conditioning", shortLabel:"Lift", icon:"wrench" },
-  { id:"bat-program", label:"Weighted Bat Program", shortLabel:"Bat", icon:"flame" },
-  { id:"drills-library", label:"Hitting Drills", shortLabel:"Drills", icon:"book" },
-  { id:"dashboard", label:"Hitting Metrics Dashboard", shortLabel:"Metrics", icon:"chart" },
-  { id:"offseason-builder", label:"Offseason Program Builder", shortLabel:"Builder", icon:"target" },
+  { id:"daily-plan", label:"Today", shortLabel:"Today", icon:"calendar" },
+  { id:"progress", label:"Progress", shortLabel:"Progress", icon:"wrench" },
+  { id:"dashboard", label:"Dashboard", shortLabel:"Dashboard", icon:"chart" },
 ];
+
+// v24: "Progress" isn't its own route — it's a redirect to whichever of
+// Strength & Conditioning / Weighted Bat Program was viewed last (both
+// still render exactly as before). navGroupFor() maps either sub-view back
+// to "progress" so the sidebar highlights correctly.
+let progressLastTab = "strength-hub";
+function navGroupFor(view){
+  return (view === "strength-hub" || view === "bat-program") ? "progress" : view;
+}
+function progressTabSwitcher(active){
+  return `<div class="week-tabs" style="margin-bottom:16px;">
+    <div class="week-tab ${active==='strength-hub'?'active':''}" onclick="go('strength-hub')">Lift</div>
+    <div class="week-tab ${active==='bat-program'?'active':''}" onclick="go('bat-program')">Bat</div>
+  </div>`;
+}
 
 // v8: two label spans per item — the full desktop label and a short mobile
 // label — swapped purely via CSS media query (.nav-label-full/.nav-label-short)
@@ -1544,8 +1659,10 @@ function renderNav(){
 }
 
 function go(view, param){
+  if(view === "progress") view = progressLastTab;
+  if(view === "strength-hub" || view === "bat-program") progressLastTab = view;
   location.hash = view + (param ? "/"+param : "");
-  document.querySelectorAll(".nav-item").forEach(el => el.classList.toggle("active", el.dataset.nav === view));
+  document.querySelectorAll(".nav-item").forEach(el => el.classList.toggle("active", el.dataset.nav === navGroupFor(view)));
   const main = document.getElementById("main");
   if(view === "daily-plan") main.innerHTML = renderDailyPlan();
   else if(view === "strength-hub") main.innerHTML = renderStrengthHub();
@@ -1637,18 +1754,18 @@ function renderStrengthHub(){
   const generic = scBlock(scTab);
 
   let html = `<div class="page-head"><h1>Strength & Conditioning</h1><div class="sub">Off-season build and in-season maintenance — conditioning is folded right into each day. One day shows at a time; log every set and it advances to the next day, then the next week, on its own.</div></div>`;
+  html += progressTabSwitcher('strength-hub');
   html += `<div class="week-tabs">` + SC_TABS.map(t => `<div class="week-tab ${t.id===scTab?'active':''}" onclick="setScTab('${t.id}')">${t.label}</div>`).join("") + `</div>`;
 
   // v6: nothing renders until the track is explicitly started.
-  // v23: off-season adds a one-time training-age question that caps the RIR
-  // floor for lifters newer to the weight room — see scRirLabel().
+  // v24: no more blocking training-age question here — a brand-new athlete
+  // can go straight from "Start" to exercise #1. Training experience now
+  // defaults silently to the safer/capped RIR wave and lives as a one-line,
+  // editable-anytime setting in Profile (see setTrainingAge()) instead of a
+  // required choice before the very first session.
   if(!track.started){
     const disclaimerLine = `<div class="disclaimer-inline">Heads up: this section involves heavy loading and real injury risk. Train within your ability and stop if anything hurts. Not medical advice — see a doctor before starting if you're unsure.</div>`;
-    if(scTab === 'offseason'){
-      html += `<div class="card"><div class="card-title" style="margin-bottom:8px;">Start ${tabLabel}</div><div class="phil-text" style="font-size:13px;margin-bottom:14px;">${generic.focus}</div>${disclaimerLine}<div class="phil-text" style="font-size:12.5px;color:var(--text-dim);margin-bottom:10px;"><strong style="color:var(--text);">How long have you been lifting?</strong> This sets how heavy Block 2 gets — lifters newer to the weight room stay capped at a lighter effort ceiling all the way through it.</div><div style="display:flex;gap:10px;flex-wrap:wrap;"><button class="btn btn-ghost" style="width:auto;padding:11px 18px;" onclick="startScTrack('${scTab}','new')">Less than 1 year</button><button class="btn btn-primary" style="width:auto;padding:11px 18px;" onclick="startScTrack('${scTab}','experienced')">1+ years</button></div></div>`;
-    } else {
-      html += `<div class="card"><div class="card-title" style="margin-bottom:8px;">Start ${tabLabel}</div><div class="phil-text" style="font-size:13px;margin-bottom:14px;">${generic.focus}</div>${disclaimerLine}<button class="btn btn-primary" style="width:auto;padding:11px 22px;" onclick="startScTrack('${scTab}')">Start ${tabLabel}</button></div>`;
-    }
+    html += `<div class="card"><div class="card-title" style="margin-bottom:8px;">Start ${tabLabel}</div><div class="phil-text" style="font-size:13px;margin-bottom:14px;">${generic.focus}</div>${disclaimerLine}<button class="btn btn-primary" style="width:auto;padding:11px 22px;" onclick="startScTrack('${scTab}')">Start ${tabLabel}</button></div>`;
     return html;
   }
 
@@ -1702,25 +1819,28 @@ function renderStrengthHub(){
     const parsed = parseSets(item.sets);
     const effectiveName = getSwappedName(scTab, di, exIdx, item.name);
     const options = [item.name, ...(item.alts||[])];
+    const swapCacheKey = scTab+"|"+di+"|"+exIdx;
+    swapOptionsCache[swapCacheKey] = { scTab, di, exIdx, options, effectiveName, baseName: item.name };
     const effortNote = item.power ? "Power target — move every rep with intent, stop when bar speed drops" : (meta.weekInBlock ? scRirLabel(meta.weekInBlock, track.trainingAge) : "");
     html += `<div style="padding:10px 18px 4px;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <select onchange="setSwap('${scTab}',${di},${exIdx},this.value)" style="flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:7px 9px;color:var(--text);font-size:13.5px;font-weight:600;">
-          ${options.map(o => `<option value="${o.replace(/"/g,'&quot;')}" ${o===effectiveName?'selected':''}>${o}</option>`).join("")}
-        </select>
+        <div style="flex:1;font-size:13.5px;font-weight:600;color:var(--text);">${effectiveName}</div>
+        <button class="swap-btn" aria-label="Swap exercise" onclick="openSwapSheet('${swapCacheKey}')">${icon('refresh')}</button>
       </div>
-      <div class="desc" style="margin-top:4px;">${item.note||""}${item.note && effortNote ? ' · ' : ''}${effortNote}${item.alts && item.alts.length ? ' · '+item.alts.length+' similar options' : ''}</div>
+      <div class="desc" style="margin-top:4px;">${item.note||""}${item.note && effortNote ? ' · ' : ''}${effortNote}</div>
     </div>`;
+    // v24: one weight field + a "same reps as prescribed" default per
+    // exercise, instead of a row per set — see quickSetWeight/quickSetReps/
+    // quickToggleLog above for how this still keeps every set slot in sync.
+    const st0 = getSetState(p, scTab, viewWeek, di, exIdx, 0);
+    const repsLabelEscaped = parsed.label.replace(/'/g,"\\'");
     html += `<div class="set-row head"><div></div><div>WEIGHT</div><div>REPS</div><div>LOG</div></div>`;
-    for(let s=0; s<parsed.count; s++){
-      const st = getSetState(p, scTab, viewWeek, di, exIdx, s);
-      html += `<div class="set-row">
-        <div class="set-num">${s+1}</div>
-        <input type="text" inputmode="decimal" value="${st.weight}" placeholder="—" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'weight',this.value)">
-        <input type="text" value="${st.reps}" placeholder="${parsed.label}" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'reps',this.value)">
-        <div class="log-box ${st.logged?'done':''}" onclick="toggleSetLog('${scTab}',${viewWeek},${di},${exIdx},${s})">${st.logged?icon('check'):''}</div>
-      </div>`;
-    }
+    html += `<div class="set-row">
+      <div class="set-num">${parsed.count>1 ? parsed.count+'x' : ''}</div>
+      <input type="text" inputmode="decimal" value="${st0.weight}" placeholder="—" onchange="quickSetWeight('${scTab}',${viewWeek},${di},${exIdx},${parsed.count},this.value)">
+      <input type="text" value="${st0.reps}" placeholder="${parsed.label}" onchange="quickSetReps('${scTab}',${viewWeek},${di},${exIdx},${parsed.count},this.value)">
+      <div class="log-box ${st0.logged?'done':''}" onclick="quickToggleLog('${scTab}',${viewWeek},${di},${exIdx},${parsed.count},'${repsLabelEscaped}')">${st0.logged?icon('check'):''}</div>
+    </div>`;
   });
   html += `<div style="height:8px;"></div></div>`;
 
@@ -1834,6 +1954,7 @@ function renderBatProgram(){
   const totalWeeks = WEIGHTED_BAT.weeks.length;
 
   let html = `<div class="page-head"><h1>Weighted Bat Program</h1><div class="sub">${WEIGHTED_BAT.overview}</div></div>`;
+  html += progressTabSwitcher('bat-program');
 
   // v20: collapsible reference card for the real program content (philosophy,
   // weekly structure, 5-bat progression, safety) — shown on every state
@@ -1975,6 +2096,7 @@ function renderDailyPlan(){
     html += `<div class="item-block"><div style="padding-top:6px;">` + picks.map((it, i) => {
       return `<div class="simple-check-row"><span><div class="label">${it.drill}</div><div class="desc">${it.catName}</div></span><button onclick="removeDailyPick(${i})" style="background:none;border:none;color:var(--text-mute);font-size:16px;">&times;</button></div>`;
     }).join("") + `</div></div>`;
+    html += `<div style="margin:6px 0 16px;"><a href="#" onclick="go('drills-library');return false;" style="color:var(--accent);font-size:12px;">+ Browse more drills</a></div>`;
   }
 
   html += videoBlock("Cool-Down", cooldownCats);
@@ -2223,12 +2345,25 @@ function renderProfile(){
   // v8: Sign Out lives here too (not just the desktop sidebar-foot) — on
   // mobile the sidebar becomes a bottom tab bar and drops the Sign Out row,
   // so Profile is where it needs to be reachable from a phone.
+  // v24: training experience moved here from a blocking Start-gate question
+  // — defaults silently, changeable anytime. Only shown once the off-season
+  // track has actually been started (nothing to set before then).
+  const scProg = loadScProgress();
+  const trainingAge = scProg.offseason.trainingAge;
+  const trainingAgeRow = scProg.offseason.started ? `<div class="simple-check-row">
+      <div class="label">Training experience</div>
+      <span style="display:flex;align-items:center;gap:10px;">
+        <span class="desc">${trainingAge === 'new' ? 'Less than 1 year' : '1+ years'}</span>
+        <button class="btn btn-ghost" style="width:auto;padding:6px 12px;font-size:12px;" onclick="setTrainingAge('${trainingAge === 'new' ? 'experienced' : 'new'}')">Change</button>
+      </span>
+    </div>` : '';
   return `<div class="page-head"><h1>Profile & Settings</h1></div>
   <div class="card">
     <div class="card-title" style="margin-bottom:14px;">${session.name}</div>
     <div class="simple-check-row" style="padding-left:0;"><div class="label">Role</div><span class="role-badge">${session.role}</span></div>
     <div class="simple-check-row"><div class="label">Username</div><div class="desc">${session.username}</div></div>
     <div class="simple-check-row"><div class="label">Active program</div><div class="desc">${programs[session.programId] ? programs[session.programId].name : "None"}</div></div>
+    ${trainingAgeRow}
   </div>
   <button class="btn btn-ghost" style="width:auto;padding:10px 20px;" onclick="signOut()">Sign Out</button>
   <div class="hint">v1 prototype — this is a demo account for testing. Real accounts, password reset, and multi-hitter rosters are planned for v2.</div>`;
