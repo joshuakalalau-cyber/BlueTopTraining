@@ -70,6 +70,31 @@ input,select{font-family:inherit;}
 .swap-option.selected{color:var(--accent);}
 .swap-sheet-close{width:100%;margin-top:8px;}
 
+/* ---------- Exercise card: muscle-group tag + video/history icons (v26) ----
+   Modeled on the RP Hypertrophy app screen recordings Josh sent: a small
+   colored pill above each exercise name (per muscle group / bat-load bucket),
+   and a row of small icon buttons (watch video, view history, swap) in the
+   card's top-right instead of one lone swap button. Each icon toggles an
+   inline panel below the header, reusing the existing inlineVideoBody()
+   pattern for video and a new compact list for history. */
+.ex-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border-radius:20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;color:#fff;margin-bottom:6px;}
+.ex-tag .bars{display:flex;gap:1.5px;align-items:flex-end;height:9px;}
+.ex-tag .bars span{width:2px;background:currentColor;opacity:0.85;border-radius:1px;}
+.ex-tag .bars span:nth-child(1){height:40%;}
+.ex-tag .bars span:nth-child(2){height:100%;}
+.ex-tag .bars span:nth-child(3){height:65%;}
+.ex-icons{display:flex;gap:6px;flex-shrink:0;}
+.ex-icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
+.ex-icon-btn svg{width:14px;height:14px;}
+.ex-icon-btn:hover{border-color:var(--accent);color:var(--accent);}
+.ex-icon-btn.open{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.ex-panel{margin:8px 18px 4px;padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;}
+.ex-history-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12.5px;border-bottom:1px solid var(--border);}
+.ex-history-row:last-child{border-bottom:none;}
+.ex-history-row .wk{color:var(--text-mute);font-size:11px;text-transform:uppercase;letter-spacing:0.3px;flex-shrink:0;width:64px;}
+.ex-history-row .vals{color:var(--text);text-align:right;flex:1;}
+.ex-history-empty{font-size:12px;color:var(--text-mute);padding:4px 0;}
+
 /* ---------- App shell ---------- */
 #app-shell{display:none;min-height:100vh;}
 #app-shell.active{display:flex;}
@@ -363,6 +388,8 @@ const ICONS = {
   flame:'<path d="M12 2s6 5 6 11a6 6 0 1 1-12 0c0-2 1-3 2-4 .5 2 1.5 2.5 1.5 2.5C9 8 10 4 12 2z"/>',
   play:'<circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/>',
   refresh:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+  history:'<path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 16 14"/>',
+  monitor:'<rect x="2" y="4" width="20" height="14" rx="2"/><polygon points="10 9 15 12 10 15 10 9"/>',
 };
 function icon(name){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg>'; }
 
@@ -1367,6 +1394,108 @@ function swapKey(track, dayIdx, exIdx){ return "hp_sc_swap_" + session.username 
 function getSwappedName(track, dayIdx, exIdx, defaultName){ return localStorage.getItem(swapKey(track,dayIdx,exIdx)) || defaultName; }
 function setSwap(track, dayIdx, exIdx, name){ localStorage.setItem(swapKey(track,dayIdx,exIdx), name); go("strength-hub"); }
 
+/* ---------- v26: exercise tag (muscle group), video panel, history panel ----
+   Josh sent 3 screen recordings of the RP Hypertrophy app and asked to model
+   Blue Top's S&C/Bat exercise cards after it: a small colored pill per
+   exercise (BACK/TRICEPS/CHEST/etc in the reference), a video icon, a
+   history icon, and — for S&C specifically — back to a full per-set grid
+   instead of the v24 single-row quick-log (his words: "go back to the sets
+   for S&C as well"). None of Blue Top's ~150 S&C exercises have a hand-tagged
+   muscle group in the data, and tagging every one by hand wasn't a good use
+   of this pass, so EX_TAG_RULES below infers a tag from the exercise name via
+   keyword matching — logged as an assumption for Josh's review rather than a
+   blocking question, per the build-loop's soft-fail rule. Bat Program isn't
+   muscle-group organized at all (it's a 5-bat overload/underload ladder), so
+   its tag is derived from the bat weight instead (see batExerciseTag()). */
+const EX_TAG_COLORS = {
+  LEGS:"#F59E0B", BACK:"#14B8A6", CHEST:"#EC4899", SHOULDERS:"#3B82F6",
+  BICEPS:"#84CC16", TRICEPS:"#D946EF", CORE:"#8B5CF6", CONDITIONING:"#64748B",
+  POWER:"#EF4444", OVERLOAD:"#F59E0B", UNDERLOAD:"#3B82F6", "GAME BAT":"#EF4444",
+};
+// Order matters — first match wins, so more specific keywords (e.g. "OH Press"
+// for shoulders) are listed before broader ones (e.g. "Press" for chest).
+const EX_TAG_RULES = [
+  ["SHOULDERS", /\b(oh press|overhead press|shoulder press|landmine press|arnold|push press|face pull|external rotation|y-t-w|cuban press|scap|rear delt|wall slide|pull-apart)\b/i],
+  ["TRICEPS", /\b(skullcrusher|tricep|close-grip|dip|floor press)\b/i],
+  ["BICEPS", /\b(curl)\b/i],
+  ["BACK", /\b(row|pulldown|pull-up|chin-up|lat\b)\b/i],
+  ["CORE", /\b(plank|pallof|dead bug|hollow|ab wheel|rollout|chop|carry|crunch|leg raise|knee raise|bird dog)\b/i],
+  ["CONDITIONING", /\b(run|sprint|bike|row intervals|elliptical|treadmill|prowler|sled)\b/i],
+  ["POWER", /\b(jump|clean|shrug|throw|slam|bound|hop|plyo)\b/i],
+  ["LEGS", /\b(squat|lunge|deadlift|rdl|hip thrust|glute|calf|step-up|good morning|split squat)\b/i],
+  ["CHEST", /\b(bench|chest|push-up|pushup|press)\b/i],
+];
+function exerciseTag(name){
+  for(const [tag, re] of EX_TAG_RULES) if(re.test(name)) return tag;
+  return "CONDITIONING";
+}
+function batExerciseTag(name){
+  if(/72 oz|66 oz|45 oz/.test(name)) return "OVERLOAD";
+  if(/24 oz|16 oz/.test(name)) return "UNDERLOAD";
+  return "GAME BAT";
+}
+function exTagPill(tag){
+  const color = EX_TAG_COLORS[tag] || EX_TAG_COLORS.CONDITIONING;
+  return `<span class="ex-tag" style="background:${color};"><span class="bars"><span></span><span></span><span></span></span>${tag}</span>`;
+}
+
+// v26: video + history toggle panels, one entry per rendered exercise row,
+// keyed the same way swapOptionsCache already is (track|dayIdx|exIdx) so a
+// given exercise slot remembers its open/closed state across re-renders.
+let openExVideo = {};
+let openExHistory = {};
+function toggleExVideo(key, returnView){ openExVideo[key] = !openExVideo[key]; go(returnView); }
+function toggleExHistory(key, returnView){ openExHistory[key] = !openExHistory[key]; go(returnView); }
+
+// Scans every week the athlete has reached in this track for the SAME
+// exercise slot (track+day+exercise index), collecting whichever weeks
+// actually match today's exercise name (accounting for swap — see swapKey
+// above, which is day-slot-scoped rather than week-scoped) so a swapped
+// exercise's history doesn't get mixed with whatever used to live in that
+// slot before the swap, or with a different exercise that block rotates in.
+function getScExerciseHistory(track, dayIdx, exIdx, effectiveName, upToWeek){
+  const p = loadScProgress();
+  const out = [];
+  for(let w=1; w<=upToWeek; w++){
+    const days = scDaysForWeek(track, w);
+    const day = days[dayIdx];
+    const item = day && day.items[exIdx];
+    if(!item) continue;
+    const nameThisWeek = getSwappedName(track, dayIdx, exIdx, item.name);
+    if(nameThisWeek !== effectiveName) continue;
+    const parsed = parseSets(item.sets);
+    const setsLogged = [];
+    for(let s=0; s<parsed.count; s++){
+      const st = getSetState(p, track, w, dayIdx, exIdx, s);
+      if(st.logged && (st.weight || st.reps)) setsLogged.push(st);
+    }
+    if(setsLogged.length) out.push({ week:w, sets:setsLogged });
+  }
+  return out.reverse(); // most recent week first
+}
+function getBatExerciseHistory(dayIdx, exIdx, name, upToWeek){
+  const p = loadBatProgram();
+  const out = [];
+  for(let w=1; w<=upToWeek; w++){
+    const days = batDaysForWeek(w);
+    const day = days[dayIdx];
+    const item = day && day.items[exIdx];
+    if(!item || item.name !== name) continue;
+    const parsed = parseSets(item.sets);
+    const setsLogged = [];
+    for(let s=0; s<parsed.count; s++){
+      const st = getBatSetState(p, w, dayIdx, exIdx, s);
+      if(st.logged && (st.weight || st.reps)) setsLogged.push(st);
+    }
+    if(setsLogged.length) out.push({ week:w, sets:setsLogged });
+  }
+  return out.reverse();
+}
+function historyPanelHtml(entries){
+  if(!entries.length) return `<div class="ex-history-empty">No logged sets yet for this exercise — once you log a set, it'll show up here.</div>`;
+  return entries.map(e => `<div class="ex-history-row"><span class="wk">Week ${e.week}</span><span class="vals">${e.sets.map(s=>`${s.weight||'—'}${s.reps ? ' x '+s.reps : ''}`).join(', ')}</span></div>`).join("");
+}
+
 // v24: the exercise-swap control used to be a persistent <select> sitting on
 // every single exercise row, competing visually with the weight/rep inputs
 // on every row of every day. Same underlying options, but now it's a single
@@ -1827,25 +1956,41 @@ function renderStrengthHub(){
     const swapCacheKey = scTab+"|"+di+"|"+exIdx;
     swapOptionsCache[swapCacheKey] = { scTab, di, exIdx, options, effectiveName, baseName: item.name };
     const effortNote = item.power ? "Power target — move every rep with intent, stop when bar speed drops" : (meta.weekInBlock ? scRirLabel(meta.weekInBlock, track.trainingAge) : "");
+    const exKey = "sc-"+scTab+"-"+di+"-"+exIdx;
+    const videoOpen = !!openExVideo[exKey];
+    const historyOpen = !!openExHistory[exKey];
     html += `<div style="padding:10px 18px 4px;">
+      ${exTagPill(exerciseTag(effectiveName))}
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
         <div style="flex:1;font-size:13.5px;font-weight:600;color:var(--text);">${effectiveName}</div>
-        <button class="swap-btn" aria-label="Swap exercise" onclick="openSwapSheet('${swapCacheKey}')">${icon('refresh')}</button>
+        <div class="ex-icons">
+          <button class="ex-icon-btn ${videoOpen?'open':''}" aria-label="Watch video" onclick="toggleExVideo('${exKey}','strength-hub')">${icon('monitor')}</button>
+          <button class="ex-icon-btn ${historyOpen?'open':''}" aria-label="View history" onclick="toggleExHistory('${exKey}','strength-hub')">${icon('history')}</button>
+          <button class="swap-btn" aria-label="Swap exercise" onclick="openSwapSheet('${swapCacheKey}')">${icon('refresh')}</button>
+        </div>
       </div>
       <div class="desc" style="margin-top:4px;">${item.note||""}${item.note && effortNote ? ' · ' : ''}${effortNote}</div>
     </div>`;
-    // v24: one weight field + a "same reps as prescribed" default per
-    // exercise, instead of a row per set — see quickSetWeight/quickSetReps/
-    // quickToggleLog above for how this still keeps every set slot in sync.
-    const st0 = getSetState(p, scTab, viewWeek, di, exIdx, 0);
-    const repsLabelEscaped = parsed.label.replace(/'/g,"\\'");
+    if(videoOpen) html += `<div class="ex-panel">${inlineVideoBody(item.video)}</div>`;
+    if(historyOpen){
+      const hist = getScExerciseHistory(scTab, di, exIdx, effectiveName, blockDone ? cap : track.week);
+      html += `<div class="ex-panel">${historyPanelHtml(hist)}</div>`;
+    }
+    // v26: back to a row per set (Josh: "go back to the sets for S&C as
+    // well") — reuses the original per-set updateSetField/toggleSetLog
+    // functions (parked, unused since v24, never deleted) instead of the
+    // v24 single-row quickSet* functions, so this is the same pattern the
+    // Weighted Bat Program grid below already uses.
     html += `<div class="set-row head"><div></div><div>WEIGHT</div><div>REPS</div><div>LOG</div></div>`;
-    html += `<div class="set-row">
-      <div class="set-num">${parsed.count>1 ? parsed.count+'x' : ''}</div>
-      <input type="text" inputmode="decimal" value="${st0.weight}" placeholder="—" onchange="quickSetWeight('${scTab}',${viewWeek},${di},${exIdx},${parsed.count},this.value)">
-      <input type="text" value="${st0.reps}" placeholder="${parsed.label}" onchange="quickSetReps('${scTab}',${viewWeek},${di},${exIdx},${parsed.count},this.value)">
-      <div class="log-box ${st0.logged?'done':''}" onclick="quickToggleLog('${scTab}',${viewWeek},${di},${exIdx},${parsed.count},'${repsLabelEscaped}')">${st0.logged?icon('check'):''}</div>
-    </div>`;
+    for(let s=0; s<parsed.count; s++){
+      const st = getSetState(p, scTab, viewWeek, di, exIdx, s);
+      html += `<div class="set-row">
+        <div class="set-num">${s+1}</div>
+        <input type="text" inputmode="decimal" value="${st.weight}" placeholder="—" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'weight',this.value)">
+        <input type="text" value="${st.reps}" placeholder="${parsed.label}" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'reps',this.value)">
+        <div class="log-box ${st.logged?'done':''}" onclick="toggleSetLog('${scTab}',${viewWeek},${di},${exIdx},${s})">${st.logged?icon('check'):''}</div>
+      </div>`;
+    }
   });
   html += `<div style="height:8px;"></div></div>`;
 
@@ -2011,10 +2156,25 @@ function renderBatProgram(){
     `<button class="btn ${done?'btn-ghost':'btn-primary'}" style="width:auto;margin:0;padding:8px 14px;font-size:12px;" onclick="completeBatDay(${viewWeek},${di})">${done ? 'Completed' : 'Mark Day Complete'}</button></div>`;
   d.items.forEach((item, exIdx) => {
     const parsed = parseSets(item.sets);
+    const exKey = "bat-"+di+"-"+exIdx;
+    const videoOpen = !!openExVideo[exKey];
+    const historyOpen = !!openExHistory[exKey];
     html += `<div style="padding:10px 18px 4px;">
-      <div class="label" style="font-weight:600;font-size:13.5px;">${item.name}</div>
+      ${exTagPill(batExerciseTag(item.name))}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div class="label" style="flex:1;font-weight:600;font-size:13.5px;">${item.name}</div>
+        <div class="ex-icons">
+          <button class="ex-icon-btn ${videoOpen?'open':''}" aria-label="Watch video" onclick="toggleExVideo('${exKey}','bat-program')">${icon('monitor')}</button>
+          <button class="ex-icon-btn ${historyOpen?'open':''}" aria-label="View history" onclick="toggleExHistory('${exKey}','bat-program')">${icon('history')}</button>
+        </div>
+      </div>
       <div class="desc" style="margin-top:4px;">${item.note||""}</div>
     </div>`;
+    if(videoOpen) html += `<div class="ex-panel">${inlineVideoBody(item.video)}</div>`;
+    if(historyOpen){
+      const hist = getBatExerciseHistory(di, exIdx, item.name, blockDone ? totalWeeks : p.week);
+      html += `<div class="ex-panel">${historyPanelHtml(hist)}</div>`;
+    }
     html += `<div class="set-row head"><div></div><div>WEIGHT</div><div>REPS</div><div>LOG</div></div>`;
     for(let s=0; s<parsed.count; s++){
       const st = getBatSetState(p, viewWeek, di, exIdx, s);
