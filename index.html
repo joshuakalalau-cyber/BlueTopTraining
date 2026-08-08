@@ -240,12 +240,13 @@ input,select{font-family:inherit;}
   }
   .sidebar .brand{display:none;}
   .nav-spacer{display:none;}
-  /* #nav-items holds 6 icons, .sidebar-foot holds 1 (Profile, once Sign Out
-     is hidden) — flex:6/flex:1 keeps every icon the same width across both
-     containers instead of the two containers splitting the bar 50/50. */
+  /* #nav-items holds 4 icons (v25: Today/Build/Drills/Dashboard),
+     .sidebar-foot holds 1 (Profile, once Sign Out is hidden) — flex:4/flex:1
+     keeps every icon the same width across both containers instead of the
+     two containers splitting the bar 50/50. */
   .sidebar-foot{border-top:none;padding-top:0;margin-top:0;display:flex;flex:1;}
   .sidebar-foot [onclick="signOut()"]{display:none;}
-  #nav-items{display:flex;flex:6;}
+  #nav-items{display:flex;flex:4;}
   .sidebar .nav-item{
     flex:1;flex-direction:column;justify-content:center;gap:3px;
     padding:7px 2px;margin-bottom:0;border-radius:8px;text-align:center;
@@ -1622,15 +1623,18 @@ function ackDisclaimer(){
 /* ---------------------- Nav / router --------------------------------------- */
 
 // v24: collapsed from 6 primary tabs to 3 per the simplification pressure
-// test — S&C and the Weighted Bat Program now live under one "Progress" tab
-// (see renderProgress()/progressTab), Drills is reachable from Today instead
-// of its own tab, and Offseason Builder (a placeholder that went nowhere) is
-// dropped from nav entirely. The underlying render functions and the
-// "drills-library"/"offseason-builder" routes are untouched — still reachable
-// by go(), just not surfaced as top-level destinations.
+// test — S&C and the Weighted Bat Program now live under one combined tab
+// (see progressTabSwitcher()), and Offseason Builder (a placeholder that
+// went nowhere) is dropped from nav entirely. The underlying render
+// functions and the "offseason-builder" route are untouched — still
+// reachable by go(), just not surfaced as a top-level destination.
+// v25: Drills restored as its own primary nav button (was reachable only
+// via a link from Today in v24; testers wanted it back at top level), and
+// the combined S&C/Bat tab renamed "Progress" -> "Build" per Josh.
 const NAV = [
   { id:"daily-plan", label:"Today", shortLabel:"Today", icon:"calendar" },
-  { id:"progress", label:"Progress", shortLabel:"Progress", icon:"wrench" },
+  { id:"progress", label:"Build", shortLabel:"Build", icon:"wrench" },
+  { id:"drills-library", label:"Drills", shortLabel:"Drills", icon:"play" },
   { id:"dashboard", label:"Dashboard", shortLabel:"Dashboard", icon:"chart" },
 ];
 
