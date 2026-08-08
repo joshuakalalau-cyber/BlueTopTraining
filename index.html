@@ -241,7 +241,11 @@ input,select{font-family:inherit;}
 .video-empty-inline{font-size:11.5px;color:var(--text-mute);margin-top:8px;padding:10px 12px;background:var(--panel2);border-radius:2px;}
 .video-link-inline{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--accent);font-weight:600;}
 .empty-state{text-align:center;padding:50px 20px;color:var(--text-dim);}
-.section-label{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mute);margin:22px 0 10px;font-weight:700;}
+/* v30: section titles bumped to match the page title's scale (Josh: "bigger
+   lettering matching the daily hitting plan size") -- same size/weight/tracking
+   as .page-head h1 below, just not the page's own color so it still reads as
+   a section, not another page header. */
+.section-label{font-size:21px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text);margin:26px 0 12px;font-weight:900;}
 .section-label:first-child{margin-top:0;}
 .hint{font-size:12px;color:var(--text-mute);margin-top:10px;}
 .top-actions{display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;}
@@ -284,6 +288,7 @@ input,select{font-family:inherit;}
   .main{padding:16px 14px calc(78px + env(safe-area-inset-bottom));max-width:100%;}
   .page-head{margin:-16px -14px 20px;padding:18px 14px 16px;}
   .page-head h1{font-size:19px;}
+  .section-label{font-size:19px;}
 
   /* app-like horizontal scroll strips instead of wrapping to many rows */
   .week-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
@@ -1680,9 +1685,18 @@ function batExerciseTag(name){
   if(/24 oz|16 oz/.test(name)) return "UNDERLOAD";
   return "GAME BAT";
 }
+function hexToRgba(hex, alpha){
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 function exTagPill(tag){
   const color = EX_TAG_COLORS[tag] || EX_TAG_COLORS.CONDITIONING;
-  return `<span class="ex-tag" style="background:${color};"><span class="bars"><span></span><span></span><span></span></span>${tag}</span>`;
+  // v30: subtle/transparent pill (Josh: "colors of the different categories
+  // more transparent and subtle then so bright and bold") -- tinted background
+  // + soft border instead of a solid saturated fill, text/icon in the full
+  // category color via currentColor so it still reads at a glance.
+  return `<span class="ex-tag" style="background:${hexToRgba(color,0.14)};border:1px solid ${hexToRgba(color,0.4)};color:${color};"><span class="bars"><span></span><span></span><span></span></span>${tag}</span>`;
 }
 
 // v26: video + history toggle panels, one entry per rendered exercise row,
