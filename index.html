@@ -15,7 +15,7 @@
   --text:#FFFFFF; --text-dim:#94A3B8; --text-mute:#64748B;
   --accent:#FF5722; --accent-dim:#5A2413; --accent-hover:#E64A19;
   --gold:#FFC107; --green:#2FBF71; --amber:#FFC107; --red:#EF4444;
-  --radius:6px;
+  --radius:2px;
 }
 *{box-sizing:border-box;}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
@@ -23,20 +23,20 @@ a{color:inherit;}
 button{font-family:inherit;cursor:pointer;}
 input,select{font-family:inherit;}
 ::-webkit-scrollbar{width:8px;height:8px;}
-::-webkit-scrollbar-thumb{background:#333338;border-radius:4px;}
+::-webkit-scrollbar-thumb{background:#333338;border-radius:0;}
 
 /* ---------- Login ---------- */
 #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 20%,#1c1c20,var(--bg));}
-.login-card{width:360px;max-width:90vw;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:36px 32px;}
+.login-card{width:360px;max-width:90vw;background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:36px 32px;}
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
 .brand-wordmark{font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:var(--text);font-size:15px;}
 .brand-wordmark.lg{font-size:21px;letter-spacing:0.08em;}
 .login-sub{color:var(--text-dim);font-size:13px;margin-bottom:26px;}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;}
-.field input,.field select{width:100%;padding:11px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;}
+.field input,.field select{width:100%;padding:11px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-size:14px;}
 .field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:8px;border:none;font-size:14px;font-weight:600;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:2px;border:none;font-size:14px;font-weight:600;}
 .btn-primary{background:var(--accent);color:#fff;width:100%;margin-top:8px;}
 .btn-primary:hover{background:var(--accent-hover);}
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
@@ -48,23 +48,23 @@ input,select{font-family:inherit;}
 /* ---------- Disclaimer modal ---------- */
 #disclaimer-modal{position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;background:rgba(6,11,24,0.92);padding:20px;}
 #disclaimer-modal.active{display:flex;}
-.disclaimer-card{width:480px;max-width:100%;max-height:86vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px 26px;}
+.disclaimer-card{width:480px;max-width:100%;max-height:86vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:28px 26px;}
 .disclaimer-card h2{margin:0 0 14px;font-size:17px;letter-spacing:0.02em;}
 .disclaimer-card p{font-size:13.5px;line-height:1.6;color:var(--text-dim);margin:0 0 14px;}
 .disclaimer-card p strong{color:var(--text);}
 .disclaimer-note{background:rgba(255,87,34,0.08);border-left:3px solid var(--accent);padding:8px 12px;margin-bottom:14px;}
 .disclaimer-note p{margin:0;color:var(--text);font-size:12.5px;}
-.disclaimer-inline{font-size:12px;color:var(--text-dim);background:rgba(255,87,34,0.07);border:1px solid var(--accent-dim);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.5;}
+.disclaimer-inline{font-size:12px;color:var(--text-dim);background:rgba(255,87,34,0.07);border:1px solid var(--accent-dim);border-radius:2px;padding:10px 12px;margin-bottom:14px;line-height:1.5;}
 
 /* ---------- Exercise swap sheet (v24) ---------- */
-.swap-btn{flex-shrink:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;}
+.swap-btn{flex-shrink:0;width:34px;height:34px;border-radius:2px;border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;}
 .swap-btn svg{width:16px;height:16px;}
 .swap-btn:hover{border-color:var(--accent);color:var(--accent);}
 #swap-sheet{position:fixed;inset:0;z-index:998;display:none;align-items:flex-end;justify-content:center;background:rgba(6,11,24,0.75);}
 #swap-sheet.active{display:flex;}
-.swap-sheet-card{width:100%;max-width:480px;max-height:70vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:18px 18px 24px;}
+.swap-sheet-card{width:100%;max-width:480px;max-height:70vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:2px 2px 0 0;padding:18px 18px 24px;}
 .swap-sheet-title{font-size:13px;color:var(--text-mute);margin-bottom:10px;}
-.swap-option{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:12px 10px;border-radius:8px;border:none;background:transparent;color:var(--text);font-size:14px;font-weight:600;}
+.swap-option{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:12px 10px;border-radius:2px;border:none;background:transparent;color:var(--text);font-size:14px;font-weight:600;}
 .swap-option svg{width:15px;height:15px;flex-shrink:0;}
 .swap-option:hover{background:var(--panel2);}
 .swap-option.selected{color:var(--accent);}
@@ -77,18 +77,18 @@ input,select{font-family:inherit;}
    card's top-right instead of one lone swap button. Each icon toggles an
    inline panel below the header, reusing the existing inlineVideoBody()
    pattern for video and a new compact list for history. */
-.ex-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border-radius:20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;color:#fff;margin-bottom:6px;}
+.ex-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border-radius:2px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;color:#fff;margin-bottom:6px;}
 .ex-tag .bars{display:flex;gap:1.5px;align-items:flex-end;height:9px;}
 .ex-tag .bars span{width:2px;background:currentColor;opacity:0.85;border-radius:1px;}
 .ex-tag .bars span:nth-child(1){height:40%;}
 .ex-tag .bars span:nth-child(2){height:100%;}
 .ex-tag .bars span:nth-child(3){height:65%;}
 .ex-icons{display:flex;gap:6px;flex-shrink:0;}
-.ex-icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
+.ex-icon-btn{width:30px;height:30px;border-radius:2px;border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
 .ex-icon-btn svg{width:14px;height:14px;}
 .ex-icon-btn:hover{border-color:var(--accent);color:var(--accent);}
 .ex-icon-btn.open{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
-.ex-panel{margin:8px 18px 4px;padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;}
+.ex-panel{margin:8px 18px 4px;padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:2px;}
 .ex-history-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12.5px;border-bottom:1px solid var(--border);}
 .ex-history-row:last-child{border-bottom:none;}
 .ex-history-row .wk{color:var(--text-mute);font-size:11px;text-transform:uppercase;letter-spacing:0.3px;flex-shrink:0;width:64px;}
@@ -112,14 +112,14 @@ input,select{font-family:inherit;}
 }
 .sidebar #nav-items,.sidebar .nav-spacer,.sidebar .sidebar-foot{position:relative;z-index:1;}
 .sidebar .brand{display:flex;align-items:center;gap:10px;padding:0 8px 22px 8px;border-bottom:1px solid var(--border);margin-bottom:14px;position:relative;z-index:1;}
-.nav-item{display:flex;align-items:center;gap:11px;padding:10px 10px;border-radius:8px;color:var(--text-dim);font-size:13.5px;font-weight:600;margin-bottom:2px;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 10px;border-radius:2px;color:var(--text-dim);font-size:13.5px;font-weight:600;margin-bottom:2px;}
 .nav-item svg{width:18px;height:18px;flex-shrink:0;}
 .nav-item:hover{background:var(--panel2);color:var(--text);}
 .nav-item.active{background:var(--accent-dim);color:#fff;}
 .nav-spacer{flex:1;}
 .nav-section-label{font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-mute);padding:14px 10px 6px;}
 .sidebar-foot{border-top:1px solid var(--border);padding-top:12px;margin-top:8px;}
-.role-badge{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--panel2);color:var(--text-dim);display:inline-block;margin-left:6px;text-transform:uppercase;letter-spacing:0.4px;}
+.role-badge{font-size:10px;padding:2px 8px;border-radius:2px;background:var(--panel2);color:var(--text-dim);display:inline-block;margin-left:6px;text-transform:uppercase;letter-spacing:0.4px;}
 /* nav labels: full label on desktop sidebar, short label only shows once the
    mobile media query below flips these two rules */
 .nav-label-short{display:none;}
@@ -147,7 +147,7 @@ input,select{font-family:inherit;}
 .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .card-title{font-size:15px;font-weight:700;}
 .card-tag{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;}
-.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:2px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
 .pill-green{background:rgba(47,191,113,0.14);color:var(--green);}
 .pill-amber{background:rgba(224,167,46,0.14);color:var(--amber);}
 .pill-red{background:rgba(224,38,62,0.14);color:var(--red);}
@@ -157,7 +157,7 @@ input,select{font-family:inherit;}
 .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 .cat-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .15s;}
 .cat-card:hover{border-color:var(--accent);cursor:pointer;}
-.cat-card .icn{width:36px;height:36px;border-radius:9px;background:var(--panel2);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.cat-card .icn{width:36px;height:36px;border-radius:2px;background:var(--panel2);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
 .cat-card .icn svg{width:19px;height:19px;color:var(--accent);}
 .cat-card h3{font-size:14.5px;margin:0 0 4px;}
 .cat-card p{font-size:12px;color:var(--text-dim);margin:0;line-height:1.5;}
@@ -169,9 +169,9 @@ input,select{font-family:inherit;}
 .item-block-head .meta{font-size:11.5px;color:var(--text-dim);}
 .set-row{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:10px;align-items:center;padding:6px 18px;}
 .set-row.head{color:var(--text-mute);font-size:10.5px;text-transform:uppercase;letter-spacing:0.4px;padding-bottom:8px;}
-.set-row input[type=text],.set-row input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:8px 9px;color:var(--text);font-size:13px;text-align:center;}
+.set-row input[type=text],.set-row input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--border);border-radius:2px;padding:8px 9px;color:var(--text);font-size:13px;text-align:center;}
 .set-num{color:var(--text-mute);font-size:12px;text-align:center;}
-.log-box{width:22px;height:22px;border-radius:5px;border:2px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;margin:0 auto;}
+.log-box{width:22px;height:22px;border-radius:2px;border:2px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;margin:0 auto;}
 .log-box.done{background:var(--green);border-color:var(--green);}
 .log-box.done svg{width:13px;height:13px;color:#0c1f14;}
 .item-block-foot{padding:10px 18px 16px;}
@@ -182,22 +182,22 @@ input,select{font-family:inherit;}
 
 /* program grid */
 .week-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
-.week-tab{padding:8px 14px;border-radius:8px;background:var(--panel);border:1px solid var(--border);font-size:12.5px;font-weight:600;color:var(--text-dim);}
+.week-tab{padding:8px 14px;border-radius:2px;background:var(--panel);border:1px solid var(--border);font-size:12.5px;font-weight:600;color:var(--text-dim);}
 .week-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .day-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
 .day-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
 .day-card .dname{font-size:12.5px;font-weight:700;margin-bottom:8px;}
 .day-card .dcats{display:flex;flex-direction:column;gap:5px;}
-.day-chip{font-size:10.5px;background:var(--panel2);color:var(--text-dim);padding:4px 8px;border-radius:6px;}
+.day-chip{font-size:10.5px;background:var(--panel2);color:var(--text-dim);padding:4px 8px;border-radius:2px;}
 .day-card .dgo{margin-top:12px;width:100%;font-size:11.5px;padding:8px;}
 
 /* builder */
 .builder-day-col{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;min-width:190px;}
 .builder-row{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;}
 .builder-day-col select{width:100%;margin-bottom:10px;}
-.builder-cat-tag{display:flex;align-items:center;justify-content:space-between;background:var(--panel2);padding:7px 9px;border-radius:6px;font-size:11.5px;margin-bottom:6px;}
+.builder-cat-tag{display:flex;align-items:center;justify-content:space-between;background:var(--panel2);padding:7px 9px;border-radius:2px;font-size:11.5px;margin-bottom:6px;}
 .builder-cat-tag button{background:none;border:none;color:var(--text-mute);font-size:14px;line-height:1;}
-.add-cat-btn{width:100%;padding:8px;font-size:11.5px;border:1px dashed var(--border);border-radius:6px;background:transparent;color:var(--text-dim);}
+.add-cat-btn{width:100%;padding:8px;font-size:11.5px;border:1px dashed var(--border);border-radius:2px;background:transparent;color:var(--text-dim);}
 .add-day-col{min-width:120px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--border);border-radius:var(--radius);color:var(--text-dim);font-size:12.5px;font-weight:600;}
 
 /* dashboard */
@@ -209,7 +209,7 @@ input,select{font-family:inherit;}
 .chart-wrap{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;}
 .bars{display:flex;align-items:flex-end;gap:18px;height:140px;margin-top:14px;}
 .bar-col{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;}
-.bar-col .bar{width:100%;max-width:38px;background:var(--accent);border-radius:4px 4px 0 0;}
+.bar-col .bar{width:100%;max-width:38px;background:var(--accent);border-radius:0;}
 .bar-col .blabel{font-size:10.5px;color:var(--text-dim);}
 .bar-col .bval{font-size:11px;font-weight:700;}
 
@@ -224,30 +224,30 @@ input,select{font-family:inherit;}
 .session-item button{background:none;border:none;color:var(--text-mute);font-size:16px;line-height:1;padding:0 4px;}
 .drill-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-top:1px solid var(--border);font-size:13.5px;}
 .drill-row:first-of-type{border-top:none;}
-.add-btn{font-size:11.5px;padding:6px 13px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--text);white-space:nowrap;}
+.add-btn{font-size:11.5px;padding:6px 13px;border-radius:2px;background:var(--panel2);border:1px solid var(--border);color:var(--text);white-space:nowrap;}
 .add-btn.added{background:rgba(47,191,113,0.14);color:var(--green);border-color:transparent;}
-.toast-banner{background:rgba(47,191,113,0.14);border:1px solid var(--green);color:var(--green);border-radius:8px;padding:11px 16px;font-size:13px;font-weight:600;margin-bottom:16px;}
+.toast-banner{background:rgba(47,191,113,0.14);border:1px solid var(--green);color:var(--green);border-radius:2px;padding:11px 16px;font-size:13px;font-weight:600;margin-bottom:16px;}
 .video-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
 .video-thumb{height:90px;background:var(--panel2);display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;}
 .video-thumb svg{width:26px;height:26px;color:var(--text-mute);}
-.video-badge{position:absolute;bottom:8px;right:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;background:rgba(0,0,0,0.55);color:#fff;padding:3px 8px;border-radius:20px;}
+.video-badge{position:absolute;bottom:8px;right:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;background:rgba(0,0,0,0.55);color:#fff;padding:3px 8px;border-radius:2px;}
 .video-info{padding:12px 14px;}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:50;}
-.modal-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;width:420px;max-width:90vw;}
-.video-placeholder{background:var(--panel2);border-radius:10px;padding:40px 20px;text-align:center;margin-top:6px;}
+.modal-card{background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:22px 24px;width:420px;max-width:90vw;}
+.video-placeholder{background:var(--panel2);border-radius:2px;padding:40px 20px;text-align:center;margin-top:6px;}
 .video-placeholder svg{width:30px;height:30px;color:var(--text-mute);}
-.video-toggle-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:var(--panel2);border:1px solid var(--border);color:var(--text-dim);font-size:11px;font-weight:600;flex-shrink:0;}
+.video-toggle-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:2px;background:var(--panel2);border:1px solid var(--border);color:var(--text-dim);font-size:11px;font-weight:600;flex-shrink:0;}
 .video-toggle-btn svg{width:13px;height:13px;}
-.video-empty-inline{font-size:11.5px;color:var(--text-mute);margin-top:8px;padding:10px 12px;background:var(--panel2);border-radius:8px;}
+.video-empty-inline{font-size:11.5px;color:var(--text-mute);margin-top:8px;padding:10px 12px;background:var(--panel2);border-radius:2px;}
 .video-link-inline{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--accent);font-weight:600;}
 .empty-state{text-align:center;padding:50px 20px;color:var(--text-dim);}
 .section-label{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mute);margin:22px 0 10px;font-weight:700;}
 .section-label:first-child{margin-top:0;}
 .hint{font-size:12px;color:var(--text-mute);margin-top:10px;}
 .top-actions{display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;}
-.search-box{width:100%;padding:11px 14px;background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13.5px;margin-bottom:16px;}
+.search-box{width:100%;padding:11px 14px;background:var(--panel);border:1px solid var(--border);border-radius:2px;color:var(--text);font-size:13.5px;margin-bottom:16px;}
 .lib-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
-.lib-item{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:13px 15px;}
+.lib-item{background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:13px 15px;}
 .lib-item .n{font-size:13.5px;font-weight:600;}
 .lib-item .t{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.3px;margin-top:3px;}
 @media (max-width:860px){.cat-grid,.metric-grid,.lib-grid{grid-template-columns:1fr;}}
@@ -274,7 +274,7 @@ input,select{font-family:inherit;}
   #nav-items{display:flex;flex:4;}
   .sidebar .nav-item{
     flex:1;flex-direction:column;justify-content:center;gap:3px;
-    padding:7px 2px;margin-bottom:0;border-radius:8px;text-align:center;
+    padding:7px 2px;margin-bottom:0;border-radius:2px;text-align:center;
   }
   .sidebar .nav-item svg{width:20px;height:20px;}
   .nav-label-full{display:none;}
@@ -497,9 +497,9 @@ function inlineVideoToggleBtn(key, catId, returnView, returnParam){
 }
 function inlineVideoBody(url){
   if(!url) return `<div class="video-empty-inline">No video added yet — this slot is ready as soon as one is uploaded.</div>`;
-  if(isDirectVideoFile(url)) return `<video src="${url}" controls playsinline style="width:100%;border-radius:8px;margin-top:8px;background:#000;"></video>`;
+  if(isDirectVideoFile(url)) return `<video src="${url}" controls playsinline style="width:100%;border-radius:2px;margin-top:8px;background:#000;"></video>`;
   const ytId = youTubeEmbedId(url);
-  if(ytId) return `<div style="position:relative;width:100%;padding-top:56.25%;margin-top:8px;border-radius:8px;overflow:hidden;background:#000;"><iframe src="https://www.youtube.com/embed/${ytId}" title="Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;"></iframe></div>`;
+  if(ytId) return `<div style="position:relative;width:100%;padding-top:56.25%;margin-top:8px;border-radius:2px;overflow:hidden;background:#000;"><iframe src="https://www.youtube.com/embed/${ytId}" title="Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;"></iframe></div>`;
   return `<a href="${url}" target="_blank" rel="noopener" class="video-link-inline">Watch video &#8599;</a>`;
 }
 
@@ -1411,6 +1411,7 @@ const EX_TAG_COLORS = {
   LEGS:"#F59E0B", BACK:"#14B8A6", CHEST:"#EC4899", SHOULDERS:"#3B82F6",
   BICEPS:"#84CC16", TRICEPS:"#D946EF", CORE:"#8B5CF6", CONDITIONING:"#64748B",
   POWER:"#EF4444", OVERLOAD:"#F59E0B", UNDERLOAD:"#3B82F6", "GAME BAT":"#EF4444",
+  "WARM-UP":"#22C55E", "MOVEMENT PREP":"#0D9488", "COOL-DOWN":"#0EA5E9", "TEE WORK":"#FF5722",
 };
 // Order matters — first match wins, so more specific keywords (e.g. "OH Press"
 // for shoulders) are listed before broader ones (e.g. "Press" for chest).
@@ -2209,36 +2210,71 @@ function renderDailyPlan(){
     h += `</div></div>`;
     return h;
   }
-  // v17: Warm-Up/Cool-Down rows get an in-app "Watch" toggle right on the
-  // Daily Hitting Plan (request: short YouTube clips, played in-app, not a
-  // new tab) — reuses the same inlineVideoToggleBtn/inlineVideoBody +
-  // openInlineVideo[key] mechanism the Training Library page already had,
-  // with matching "warmup-{catIdx}-{itemIdx}" keys, since that page has no
-  // nav link and this is where hitters actually see these items day to day.
+  // v28: Daily Plan restyled to match the S&C/Bat exercise-card look (Josh:
+  // "match the daily plan with the strength and conditioning formatting") —
+  // every recurring item gets the same tag-pill + icon-row treatment instead
+  // of the old plain check-row + capsule "Watch" button. Warm-Up/Movement
+  // Prep/Cool-Down each get their own tag (see EX_TAG_COLORS) so the section
+  // is visually identifiable even scrolled out of its header's view. Still
+  // reuses the same inlineVideoToggleBtn/inlineVideoBody + openInlineVideo[key]
+  // mechanism the Training Library page already had — only the markup changed.
+  function warmupCatTag(catName){
+    if(catName.startsWith("Movement Prep")) return "MOVEMENT PREP";
+    if(catName.startsWith("Cool-Down")) return "COOL-DOWN";
+    return "WARM-UP";
+  }
   function videoBlock(title, catsWithIdx){
     let h = `<div class="section-label">${title}</div><div class="item-block"><div style="padding-top:6px;">`;
     catsWithIdx.forEach(([c, ci]) => {
+      const tag = warmupCatTag(c.name);
       c.items.forEach((item, ii) => {
         const key = "warmup-"+ci+"-"+ii;
-        h += `<div class="simple-check-row" style="flex-direction:column;align-items:stretch;gap:0;">
+        const videoOpen = !!openInlineVideo[key];
+        h += `<div style="padding:10px 18px 4px;">
+          ${exTagPill(tag)}
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-            <span class="label">${item.name}</span>
-            ${inlineVideoToggleBtn(key, 'warmup', 'daily-plan')}
+            <div style="flex:1;font-size:13.5px;font-weight:600;color:var(--text);">${item.name}</div>
+            <div class="ex-icons">
+              <button class="ex-icon-btn ${videoOpen?'open':''}" aria-label="Watch video" onclick="toggleInlineVideo('${key}','warmup','daily-plan')">${icon('monitor')}</button>
+            </div>
           </div>
-          ${openInlineVideo[key] ? inlineVideoBody(item.video) : ""}
         </div>`;
+        if(videoOpen) h += `<div class="ex-panel">${inlineVideoBody(item.video)}</div>`;
       });
     });
-    h += `</div></div>`;
+    h += `<div style="height:4px;"></div></div></div>`;
+    return h;
+  }
+  // Tee Progressions used to render as flattened plain-text lines
+  // (teeStationLines()), which dropped the per-station video field TEE.stations
+  // already carries. Switched to the same card treatment as everything else so
+  // those videos (once filmed) show up here too, not just on the Training
+  // Library's Tee Progressions page.
+  function teeBlock(){
+    let h = `<div class="section-label">Tee Progressions</div><div class="item-block"><div style="padding-top:6px;">`;
+    TEE.stations.forEach((s, si) => {
+      const key = "tee-"+si;
+      const videoOpen = !!openInlineVideo[key];
+      h += `<div style="padding:10px 18px 4px;">
+        ${exTagPill("TEE WORK")}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="flex:1;font-size:13.5px;font-weight:600;color:var(--text);">${s.name}</div>
+          <div class="ex-icons">
+            <button class="ex-icon-btn ${videoOpen?'open':''}" aria-label="Watch video" onclick="toggleInlineVideo('${key}','tee','daily-plan')">${icon('monitor')}</button>
+          </div>
+        </div>
+      </div>`;
+      if(videoOpen) h += `<div class="ex-panel">${inlineVideoBody(s.video)}</div>`;
+    });
+    h += `<div style="height:4px;"></div></div></div>`;
     return h;
   }
 
   const warmupCats = WARMUP.categories.map((c,ci) => [c,ci]).filter(([c]) => !c.name.startsWith("Cool-Down"));
   const cooldownCats = WARMUP.categories.map((c,ci) => [c,ci]).filter(([c]) => c.name.startsWith("Cool-Down"));
-  const teeItems = teeStationLines();
 
   html += videoBlock("Warm-Up", warmupCats);
-  html += block("Tee Progressions", teeItems);
+  html += teeBlock();
 
   if(bat.started && bat.week <= WEIGHTED_BAT.weeks.length){
     const batDays = batDaysForWeek(bat.week);
@@ -2246,9 +2282,28 @@ function renderDailyPlan(){
     const batDay = batDays[batDayIdx];
     const batDone = isBatDayDone(bat, bat.week, batDayIdx);
     html += `<div class="section-label">Weighted Bat — Week ${bat.week}, ${batDay.day}</div>`;
-    html += `<div class="item-block"><div style="padding-top:6px;">` +
-      batDay.items.map(it => `<div class="simple-check-row"><span class="label">${it.name} — ${it.sets}</span></div>`).join("") +
-      `</div></div>`;
+    html += `<div class="item-block"><div style="padding-top:6px;">`;
+    batDay.items.forEach((it, exIdx) => {
+      const exKey = "bat-"+batDayIdx+"-"+exIdx;
+      const videoOpen = !!openExVideo[exKey];
+      const historyOpen = !!openExHistory[exKey];
+      html += `<div style="padding:10px 18px 4px;">
+        ${exTagPill(batExerciseTag(it.name))}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="flex:1;font-size:13.5px;font-weight:600;color:var(--text);">${it.name} — ${it.sets}</div>
+          <div class="ex-icons">
+            <button class="ex-icon-btn ${videoOpen?'open':''}" aria-label="Watch video" onclick="toggleExVideo('${exKey}','daily-plan')">${icon('monitor')}</button>
+            <button class="ex-icon-btn ${historyOpen?'open':''}" aria-label="View history" onclick="toggleExHistory('${exKey}','daily-plan')">${icon('history')}</button>
+          </div>
+        </div>
+      </div>`;
+      if(videoOpen) html += `<div class="ex-panel">${inlineVideoBody(it.video)}</div>`;
+      if(historyOpen){
+        const hist = getBatExerciseHistory(batDayIdx, exIdx, it.name, bat.week);
+        html += `<div class="ex-panel">${historyPanelHtml(hist)}</div>`;
+      }
+    });
+    html += `<div style="height:4px;"></div></div></div>`;
     html += `<div style="margin:-8px 0 16px;"><button class="btn ${batDone?'btn-ghost':'btn-primary'}" style="width:auto;padding:8px 14px;font-size:12px;margin:0;" onclick="completeBatDay(${bat.week},${batDayIdx})">${batDone ? 'Bat Day Completed' : 'Mark Bat Day Complete'}</button> <a href="#" onclick="go('bat-program');return false;" style="color:var(--accent);font-size:12px;margin-left:10px;">Log sets in Weighted Bat Program &#8594;</a></div>`;
   } else {
     html += `<div class="section-label">Weighted Bat Program</div><div class="card"><div class="phil-text" style="font-size:12.5px;color:var(--text-dim);">Not started yet — <a href="#" onclick="go('bat-program');return false;" style="color:var(--accent);">start the program</a> to have it added here automatically.</div></div>`;
@@ -2422,7 +2477,7 @@ function renderDashboard(){
     html += `<div class="phil-text" style="font-size:13px;margin-bottom:14px;">Upload a swing video and step through it against your Logger Hitting 101 checkpoints — mark the 6 positions, then score the 3 keys. The video stays on this device; nothing uploads anywhere.</div>
       <input type="file" accept="video/*" id="swing-video-input" onchange="loadSwingVideo(this)">`;
   } else {
-    html += `<video id="swing-video" src="${swingVideoUrl}" controls playsinline style="width:100%;border-radius:10px;margin-bottom:14px;background:#000;"></video>`;
+    html += `<video id="swing-video" src="${swingVideoUrl}" controls playsinline style="width:100%;border-radius:2px;margin-bottom:14px;background:#000;"></video>`;
     html += `<div class="card-tag" style="margin-bottom:8px;">Scrub to each position, then mark it</div>`;
     html += HITTING_RUBRIC.positions.map(p => {
       const marked = swingMarks[p.n] !== undefined;
