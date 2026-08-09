@@ -6,14 +6,16 @@
 <title>Blue Top Training</title>
 <!-- build v18b -->
 <style>
-/* v12: Industrial Midnight retheme — see blue-top-design-system.css /
-   blue-top-design-system-guide.md for the full token rationale. Status red
-   is kept distinct from brand orange on purpose (so a "below benchmark"
-   pill doesn't visually blend into a CTA button); green is unchanged. */
+/* v31: Kaipa Polo retheme -- palette pulled from Josh's reference shirt photo
+   (black polo, cyan/turquoise line-art leaf print). Base moves from navy to
+   true near-black charcoal; brand accent moves from orange to the shirt's
+   cyan, sampled directly off the photo (~#55C3CD average, pushed brighter/
+   more saturated for UI contrast on dark backgrounds). Status red/green/gold
+   stay as-is on purpose -- they're semantic, not brand identity. */
 :root{
-  --bg:#060B18; --panel:#121A2D; --panel2:#182238; --border:#2A364F;
-  --text:#FFFFFF; --text-dim:#94A3B8; --text-mute:#64748B;
-  --accent:#FF5722; --accent-dim:#5A2413; --accent-hover:#E64A19;
+  --bg:#0A0A0D; --panel:#141417; --panel2:#1B1B1F; --border:#2B2B30;
+  --text:#FFFFFF; --text-dim:#9CA3AF; --text-mute:#6B7280;
+  --accent:#2ED8E5; --accent-dim:#0F3A3D; --accent-hover:#1FC3D1;
   --gold:#FFC107; --green:#2FBF71; --amber:#FFC107; --red:#EF4444;
   --radius:2px;
 }
@@ -52,9 +54,9 @@ input,select{font-family:inherit;}
 .disclaimer-card h2{margin:0 0 14px;font-size:17px;letter-spacing:0.02em;}
 .disclaimer-card p{font-size:13.5px;line-height:1.6;color:var(--text-dim);margin:0 0 14px;}
 .disclaimer-card p strong{color:var(--text);}
-.disclaimer-note{background:rgba(255,87,34,0.08);border-left:3px solid var(--accent);padding:8px 12px;margin-bottom:14px;}
+.disclaimer-note{background:rgba(46,216,229,0.08);border-left:3px solid var(--accent);padding:8px 12px;margin-bottom:14px;}
 .disclaimer-note p{margin:0;color:var(--text);font-size:12.5px;}
-.disclaimer-inline{font-size:12px;color:var(--text-dim);background:rgba(255,87,34,0.07);border:1px solid var(--accent-dim);border-radius:2px;padding:10px 12px;margin-bottom:14px;line-height:1.5;}
+.disclaimer-inline{font-size:12px;color:var(--text-dim);background:rgba(46,216,229,0.07);border:1px solid var(--accent-dim);border-radius:2px;padding:10px 12px;margin-bottom:14px;line-height:1.5;}
 
 /* ---------- Exercise swap sheet (v24) ---------- */
 .swap-btn{flex-shrink:0;width:34px;height:34px;border-radius:2px;border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;}
@@ -317,7 +319,7 @@ input,select{font-family:inherit;}
 .leaderboard-row:last-child{border-bottom:none;}
 .leaderboard-row .rank{width:26px;text-align:center;font-weight:900;color:var(--text-dim);}
 .leaderboard-row.rank-1 .rank{color:var(--gold);}
-.leaderboard-row.is-you{background:rgba(255,87,34,0.08);border-left:3px solid var(--accent);}
+.leaderboard-row.is-you{background:rgba(46,216,229,0.08);border-left:3px solid var(--accent);}
 .leaderboard-row .name{flex:1;color:var(--text);font-weight:600;font-size:13.5px;}
 .leaderboard-row .stat{color:var(--text-dim);font-size:12.5px;font-variant-numeric:tabular-nums;}
 </style>
