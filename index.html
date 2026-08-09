@@ -280,13 +280,13 @@ input,select{font-family:inherit;}
   }
   .sidebar .brand{display:none;}
   .nav-spacer{display:none;}
-  /* #nav-items holds 4 icons (v25: Today/Build/Drills/Dashboard),
-     .sidebar-foot holds 1 (Profile, once Sign Out is hidden) — flex:4/flex:1
+  /* #nav-items holds 5 icons (v33: Today/Build/Drills/Games/Dashboard),
+     .sidebar-foot holds 1 (Profile, once Sign Out is hidden) — flex:5/flex:1
      keeps every icon the same width across both containers instead of the
      two containers splitting the bar 50/50. */
   .sidebar-foot{border-top:none;padding-top:0;margin-top:0;display:flex;flex:1;}
   .sidebar-foot [onclick="signOut()"]{display:none;}
-  #nav-items{display:flex;flex:4;}
+  #nav-items{display:flex;flex:5;}
   .sidebar .nav-item{
     flex:1;flex-direction:column;justify-content:center;gap:3px;
     padding:7px 2px;margin-bottom:0;border-radius:2px;text-align:center;
@@ -331,6 +331,68 @@ input,select{font-family:inherit;}
 .leaderboard-row.is-you{background:rgba(46,216,229,0.08);border-left:3px solid var(--accent);}
 .leaderboard-row .name{flex:1;color:var(--text);font-weight:600;font-size:13.5px;}
 .leaderboard-row .stat{color:var(--text-dim);font-size:12.5px;font-variant-numeric:tabular-nums;}
+
+/* ---------- Games: Vision Lab + Game IQ (v33) ---------- */
+.games-hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media (max-width:860px){.games-hub-grid{grid-template-columns:1fr;}}
+.game-card{background:linear-gradient(180deg, var(--panel2) 0%, var(--panel) 100%);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 3px 8px rgba(0,0,0,0.35);cursor:pointer;transition:border-color .15s;}
+.game-card:hover{border-color:var(--accent);}
+.game-card-icon{width:40px;height:40px;color:var(--accent);margin-bottom:10px;}
+.game-card-icon svg{width:100%;height:100%;}
+.game-card-title{font-size:17px;font-weight:900;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:6px;}
+.game-card-sub{font-size:13px;color:var(--text-dim);line-height:1.5;margin-bottom:14px;}
+.game-card-foot{display:flex;align-items:center;gap:10px;}
+.rank-pill{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;padding:3px 9px;border-radius:2px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(46,216,229,0.35);}
+.xp-note{font-size:12px;color:var(--text-mute);}
+
+.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width:860px){.module-grid{grid-template-columns:1fr;}}
+.module-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03), 0 2px 6px rgba(0,0,0,0.3);cursor:pointer;transition:border-color .15s;}
+.module-card:hover{border-color:var(--accent);}
+.module-card-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.module-card-head .icn{width:20px;height:20px;color:var(--accent);flex-shrink:0;}
+.module-card-head .icn svg{width:100%;height:100%;}
+.module-card-name{font-weight:700;font-size:14.5px;}
+.module-card-tag{font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:10px;}
+.module-card-foot{display:flex;justify-content:space-between;font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.3px;}
+
+.vstage-wrap{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 3px 8px rgba(0,0,0,0.35);}
+.vstage-hud{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-dim);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.3px;}
+.vstage-hud b{color:var(--text);}
+.vstage{position:relative;min-height:220px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1px solid var(--border);border-radius:2px;margin-bottom:16px;overflow:hidden;}
+.vstage-flash{font-size:52px;font-weight:900;letter-spacing:0.05em;color:var(--text);font-variant-numeric:tabular-nums;}
+.vstage-msg{font-size:14px;color:var(--text-dim);text-align:center;padding:20px;}
+.vstage-fixation{width:14px;height:14px;border:2px solid var(--text-dim);border-radius:50%;}
+.vstage-peripheral-target{position:absolute;top:50%;transform:translateY(-50%);font-size:32px;font-weight:900;color:var(--accent);}
+.vstage-peripheral-target.left{left:8%;}
+.vstage-peripheral-target.right{right:8%;}
+.vstage-reaction-dot{width:70px;height:70px;border-radius:50%;}
+.vstage-reaction-dot.go{background:var(--green);}
+.vstage-reaction-dot.nogo{background:var(--red);}
+.vstage-ball{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--accent);top:50%;left:4%;transform:translateY(-50%);}
+.vstage-zone{position:absolute;top:0;bottom:0;width:14%;right:8%;background:rgba(46,216,229,0.1);border-left:2px dashed var(--accent);border-right:2px dashed var(--accent);}
+.vstage-result-flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:0.05em;background:rgba(10,10,13,0.55);}
+.vstage-result-flash.good{color:var(--green);}
+.vstage-result-flash.bad{color:var(--red);}
+.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.answer-btn{padding:14px;background:var(--panel2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-size:14px;font-weight:700;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);}
+.answer-btn:hover{border-color:var(--accent);}
+.answer-btn.correct{border-color:var(--green);color:var(--green);background:rgba(47,191,113,0.1);}
+.answer-btn.wrong{border-color:var(--red);color:var(--red);background:rgba(239,68,68,0.1);}
+
+.scenario-box{background:var(--panel2);border:1px solid var(--border);border-radius:2px;padding:16px 18px;margin-bottom:16px;font-size:14.5px;line-height:1.6;box-shadow:inset 0 1px 3px rgba(0,0,0,0.25);}
+.scenario-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.scenario-tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;padding:3px 8px;border-radius:2px;background:var(--panel);color:var(--text-dim);border:1px solid var(--border);}
+.explain-box{background:var(--panel2);border-left:3px solid var(--accent);border-radius:2px;padding:12px 14px;margin-top:14px;font-size:13px;color:var(--text-dim);line-height:1.6;}
+.explain-box strong{color:var(--text);}
+.giq-stat-row{display:flex;gap:18px;margin-bottom:16px;}
+.giq-stat{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:12px 14px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);}
+.giq-stat .n{font-size:20px;font-weight:900;color:var(--accent);}
+.giq-stat .l{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.4px;margin-top:2px;}
+@media (max-width:640px){
+  .answer-grid{grid-template-columns:1fr;}
+  .giq-stat-row{gap:10px;}
+}
 </style>
 </head>
 <body>
@@ -406,6 +468,7 @@ const ICONS = {
   refresh:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
   history:'<path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 16 14"/>',
   monitor:'<rect x="2" y="4" width="20" height="14" rx="2"/><polygon points="10 9 15 12 10 15 10 9"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
 };
 function icon(name){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg>'; }
 
@@ -2031,10 +2094,13 @@ function ackDisclaimer(){
 // v25: Drills restored as its own primary nav button (was reachable only
 // via a link from Today in v24; testers wanted it back at top level), and
 // the combined S&C/Bat tab renamed "Progress" -> "Build" per Josh.
+// v33: Games added as a 5th primary tab -- Josh wanted it discoverable
+// alongside Today/Build/Drills/Dashboard, not buried under one of them.
 const NAV = [
   { id:"daily-plan", label:"Today", shortLabel:"Today", icon:"calendar" },
   { id:"progress", label:"Build", shortLabel:"Build", icon:"wrench" },
   { id:"drills-library", label:"Drills", shortLabel:"Drills", icon:"play" },
+  { id:"games", label:"Games", shortLabel:"Games", icon:"eye" },
   { id:"dashboard", label:"Dashboard", shortLabel:"Dashboard", icon:"chart" },
 ];
 
@@ -2073,6 +2139,10 @@ function go(view, param){
   else if(view === "strength-hub") main.innerHTML = renderStrengthHub();
   else if(view === "bat-program") main.innerHTML = renderBatProgram();
   else if(view === "drills-library") main.innerHTML = renderDrillsLibrary();
+  else if(view === "games") main.innerHTML = renderGamesHub();
+  else if(view === "vision-lab") main.innerHTML = renderVisionLab();
+  else if(view === "vision-module") main.innerHTML = renderVisionModulePage(param);
+  else if(view === "game-iq") main.innerHTML = renderGameIqPage();
   else if(view === "dashboard") main.innerHTML = renderDashboard();
   else if(view === "offseason-builder") main.innerHTML = renderOffseasonBuilder();
   else if(view === "profile") main.innerHTML = renderProfile();
@@ -2857,6 +2927,517 @@ function renderProfile(){
   </div>
   <button class="btn btn-ghost" style="width:auto;padding:10px 20px;" onclick="signOut()">Sign Out</button>
   <div class="hint">v1 prototype — this is a demo account for testing. Real accounts, password reset, and multi-hitter rosters are planned for v2.</div>`;
+}
+
+/* ---------------------- Games: Vision Lab + Game IQ (v33) ------------------
+   Josh, from the shower: "add a games tab... a visual recognition game based
+   on the research of sports vision pros... [and] another game that teaches
+   athletes to become students of the game -- kick in-game situations and they
+   answer, defensive schemes based on inning/runners/outs, hitters counts and
+   what pitch to hunt." Researched both before writing a line of code:
+   - Sports Vision Pros (sportsvisionpros.com) is a real vision-training
+     network, not a single product -- their partner stack (Senaptec Strobe
+     stroboscopic eyewear, GameSense Pitch-IQ video-occlusion pitch
+     recognition, RightEye/NeuroTracker eye-tracking) plus the published
+     tachistoscopic-training research (flash-recognition drills correlating
+     with batting average, U. Cincinnati baseball study) is the real menu of
+     drill TYPES these programs use. So Vision Lab is 5 short modules, each
+     modeled on one real drill type, built with plain DOM/timing -- no camera,
+     no licensed video, nothing external, same as the rest of this app.
+   - Game IQ's rules (cutoff assignments, infield-in vs no-doubles, hitter's-
+     count approach) are pulled from real defensive/offensive baseball
+     strategy -- see the comment on each rule below for the source logic.
+   Both persist their own progress in localStorage under session.username,
+   same "hp_<feature>_<username>" pattern as every other tracked feature. */
+
+const VISION_MODULES = [
+  { id:"flash-recall", name:"Flash Recall", icon:"eye",
+    tagline:"See it for a blink, remember what you saw.",
+    blurb:"Modeled on tachistoscopic training -- the flash-recognition drill sports vision labs have used with hitters for decades (a positive correlation shows up between tachistoscope scores and batting average). A short string of digits flashes on screen; recall it before it fades." },
+  { id:"peripheral-snap", name:"Peripheral Snap", icon:"target",
+    tagline:"Keep your eyes on center. Catch what happens at the edge.",
+    blurb:"Trains peripheral awareness the way strobe-based programs do -- hold focus on the middle of the screen while a target flashes off to one side, and call which side without ever looking away from center." },
+  { id:"reaction-gate", name:"Reaction Gate", icon:"flame",
+    tagline:"Go on green. Hold on red.",
+    blurb:"A go/no-go reaction drill -- the inhibitory-control concept behind stroboscopic (Senaptec Strobe-style) training, where the brain has to process a stimulus fast enough to react correctly instead of just quickly." },
+  { id:"track-ball", name:"Track the Ball", icon:"play",
+    tagline:"Follow it all the way into the zone.",
+    blurb:"Dynamic visual tracking and timing -- follow a moving ball with your eyes and tap the instant it crosses the zone, the same skill dynamic-visual-acuity testing measures." },
+  { id:"pitch-id", name:"Pitch ID", icon:"chart",
+    tagline:"Call it before it's gone.",
+    blurb:"Modeled on GameSense Pitch-IQ's video-occlusion method -- real pitch-recognition training shows a hitter roughly the first third of the pitch's flight, then cuts it. You have to identify the pitch off the release and early break, not the whole flight." },
+];
+
+function visionKey(){ return "hp_vision_" + session.username; }
+function loadVisionProgress(){
+  const p = JSON.parse(localStorage.getItem(visionKey()) || "{}");
+  VISION_MODULES.forEach(m => { if(!p[m.id]) p[m.id] = { level:1, bestScore:0, sessions:0 }; });
+  return p;
+}
+function saveVisionProgress(p){ localStorage.setItem(visionKey(), JSON.stringify(p)); }
+
+function gameIqKey(){ return "hp_gameiq_" + session.username; }
+function loadGameIqProgress(){
+  return Object.assign({ level:1, streak:0, bestStreak:0, answered:0, correct:0 }, JSON.parse(localStorage.getItem(gameIqKey()) || "{}"));
+}
+function saveGameIqProgress(p){ localStorage.setItem(gameIqKey(), JSON.stringify(p)); }
+
+function gamesRank(xp){
+  // Same 5-tier ladder for both games so "Vision Rank" and "Game IQ Rank"
+  // read consistently -- Rookie through Pro, echoing the "Sports Vision
+  // Pros" branding Josh pointed at for module 1.
+  if(xp >= 400) return "Pro";
+  if(xp >= 250) return "Advanced";
+  if(xp >= 120) return "Varsity";
+  if(xp >= 40) return "JV";
+  return "Rookie";
+}
+
+function shuffleArr(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; }
+
+function renderGamesHub(){
+  const vp = loadVisionProgress();
+  const visionXp = VISION_MODULES.reduce((s,m)=>s+vp[m.id].bestScore,0);
+  const gp = loadGameIqProgress();
+  let html = `<div class="page-head"><h1>Games</h1><div class="sub">Two quick training games -- Vision Lab sharpens the visual recognition skills real sports-vision programs train; Game IQ tests situational baseball knowledge until it's automatic.</div></div>`;
+  html += `<div class="games-hub-grid">
+    <div class="game-card" onclick="go('vision-lab')">
+      <div class="game-card-icon">${icon('eye')}</div>
+      <div class="game-card-title">Vision Lab</div>
+      <div class="game-card-sub">5 short modules -- flash recall, peripheral awareness, reaction speed, ball tracking, pitch ID.</div>
+      <div class="game-card-foot"><span class="rank-pill">${gamesRank(visionXp)}</span><span class="xp-note">${visionXp} XP</span></div>
+    </div>
+    <div class="game-card" onclick="go('game-iq')">
+      <div class="game-card-icon">${icon('chart')}</div>
+      <div class="game-card-title">Game IQ</div>
+      <div class="game-card-sub">Real in-game situations -- cutoffs, infield depth, coverage, and what to hunt based on the count.</div>
+      <div class="game-card-foot"><span class="rank-pill">${gamesRank(gp.correct*10)}</span><span class="xp-note">${gp.correct}/${gp.answered} correct${gp.bestStreak?` · best streak ${gp.bestStreak}`:''}</span></div>
+    </div>
+  </div>`;
+  return html;
+}
+
+/* ==================== Vision Lab ==================== */
+
+let vLive = null; // active session state (module id, level, cfg, rep progress)
+
+function visionModule(id){ return VISION_MODULES.find(m=>m.id===id); }
+
+function renderVisionLab(){
+  const vp = loadVisionProgress();
+  let html = `<div class="page-head"><div class="crumbs"><a href="#" onclick="go('games');return false;" style="color:var(--accent);">Games</a></div><h1>Vision Lab</h1><div class="sub">5 short modules modeled on real sports-vision training drills. Each one tracks its own level and best score.</div></div>`;
+  html += `<div class="module-grid">` + VISION_MODULES.map(m=>{
+    const p = vp[m.id];
+    return `<div class="module-card" onclick="go('vision-module','${m.id}')">
+      <div class="module-card-head"><div class="icn">${icon(m.icon)}</div><div class="module-card-name">${m.name}</div></div>
+      <div class="module-card-tag">${m.tagline}</div>
+      <div class="module-card-foot"><span>Level ${p.level}</span><span>Best ${p.bestScore}%</span></div>
+    </div>`;
+  }).join("") + `</div>`;
+  return html;
+}
+
+function renderVisionModulePage(id){
+  const m = visionModule(id);
+  if(!m) return `<div class="empty-state">Module not found.</div>`;
+  let html = `<div class="page-head"><div class="crumbs"><a href="#" onclick="go('vision-lab');return false;" style="color:var(--accent);">Vision Lab</a></div><h1>${m.name}</h1><div class="sub">${m.tagline}</div></div>`;
+  html += `<div id="vgame-root"></div>`;
+  setTimeout(()=> vShowIntro(id), 0);
+  return html;
+}
+function vRoot(){ return document.getElementById('vgame-root'); }
+function vStage(){ return document.getElementById('vstage'); }
+
+function vShowIntro(id){
+  const m = visionModule(id);
+  const vp = loadVisionProgress();
+  const p = vp[id];
+  const root = vRoot(); if(!root) return;
+  root.innerHTML = `
+    <div class="vstage-wrap">
+      <div class="vstage-msg">${m.blurb}</div>
+      <div class="giq-stat-row" style="margin-top:16px;">
+        <div class="giq-stat"><div class="n">${p.level}</div><div class="l">Level</div></div>
+        <div class="giq-stat"><div class="n">${p.bestScore}%</div><div class="l">Best score</div></div>
+        <div class="giq-stat"><div class="n">${p.sessions}</div><div class="l">Sessions</div></div>
+      </div>
+      <button class="btn btn-primary" style="width:auto;padding:10px 24px;margin-top:16px;" onclick="startVisionSession('${id}')">Start Session</button>
+    </div>`;
+}
+
+// v33: level 1-5 tuning per module. Exposure/duration times shorten and
+// distractor counts grow as level rises -- same "start easy, tighten the
+// window" progression the Senaptec Strobe's 8 strobe-rate settings use.
+function visionLevelConfig(moduleId, level){
+  const L = Math.max(1, Math.min(5, level));
+  const cfgs = {
+    "flash-recall": { digits:[2,2,3,3,4][L-1], exposureMs:[900,700,550,420,320][L-1], reps:8 },
+    "peripheral-snap": { exposureMs:[650,520,420,340,260][L-1], reps:10 },
+    "reaction-gate": { window:[900,850,800,750,700][L-1], noGoRatio:[0.2,0.25,0.3,0.35,0.4][L-1], reps:12 },
+    "track-ball": { durationMs:[2200,1900,1650,1400,1150][L-1], reps:8 },
+    "pitch-id": { durationMs:[1500,1350,1200,1050,900][L-1], occludeFrac:[0.62,0.55,0.48,0.42,0.36][L-1], types:[2,3,3,4,4][L-1], reps:8 },
+  };
+  return cfgs[moduleId];
+}
+
+function startVisionSession(id){
+  const vp = loadVisionProgress();
+  const level = vp[id].level;
+  vLive = { id, level, cfg: visionLevelConfig(id, level), repIdx:0, correct:0, awaiting:false, timer:null };
+  const root = vRoot(); if(!root) return;
+  root.innerHTML = `
+    <div class="vstage-hud"><span>Level <b>${level}</b></span><span id="vhud-rep">Rep <b>1</b> / ${vLive.cfg.reps}</span><span id="vhud-score">Correct <b>0</b></span></div>
+    <div class="vstage-wrap"><div class="vstage" id="vstage"></div><div id="vsub"></div></div>`;
+  vStartRep();
+}
+
+function vUpdateHud(){
+  const rep = document.getElementById('vhud-rep');
+  const score = document.getElementById('vhud-score');
+  if(rep) rep.innerHTML = `Rep <b>${Math.min(vLive.repIdx+1, vLive.cfg.reps)}</b> / ${vLive.cfg.reps}`;
+  if(score) score.innerHTML = `Correct <b>${vLive.correct}</b>`;
+}
+
+function vStartRep(){
+  if(!vLive) return;
+  vUpdateHud();
+  clearTimeout(vLive.timer);
+  const sub = document.getElementById('vsub'); if(sub) sub.innerHTML = "";
+  if(vLive.id === "flash-recall") vStartFlashRecall();
+  else if(vLive.id === "peripheral-snap") vStartPeripheral();
+  else if(vLive.id === "reaction-gate") vStartReaction();
+  else if(vLive.id === "track-ball") vStartTrackBall();
+  else if(vLive.id === "pitch-id") vStartPitchId();
+}
+
+/* -- Flash Recall: tachistoscopic flash + recall from 4 choices -- */
+function vRandomDigits(n){ let s=""; for(let i=0;i<n;i++) s+=Math.floor(Math.random()*10); return s; }
+function vFlashChoices(answer, digits){
+  const set = new Set([answer]);
+  while(set.size<4){ set.add(vRandomDigits(digits)); }
+  return shuffleArr([...set]);
+}
+function vStartFlashRecall(){
+  const answer = vRandomDigits(vLive.cfg.digits);
+  vStage().innerHTML = `<div class="vstage-msg">Ready...</div>`;
+  vLive.timer = setTimeout(()=>{
+    if(!vLive) return;
+    vStage().innerHTML = `<div class="vstage-flash">${answer}</div>`;
+    vLive.timer = setTimeout(()=>{
+      if(!vLive) return;
+      vStage().innerHTML = `<div class="vstage-msg">What did you see?</div>`;
+      const choices = vFlashChoices(answer, vLive.cfg.digits);
+      vLive.awaiting = true;
+      document.getElementById('vsub').innerHTML = `<div class="answer-grid">${choices.map(c=>`<button class="answer-btn" data-val="${c}" onclick="vAnswerMC('${c}','${answer}')">${c}</button>`).join("")}</div>`;
+    }, vLive.cfg.exposureMs);
+  }, 500);
+}
+
+/* -- Peripheral Snap: hold center, catch the edge target -- */
+function vStartPeripheral(){
+  vStage().innerHTML = `<div class="vstage-fixation"></div>`;
+  const delay = 500 + Math.random()*900;
+  vLive.timer = setTimeout(()=>{
+    if(!vLive) return;
+    const side = Math.random()<0.5 ? "left" : "right";
+    vStage().innerHTML = `<div class="vstage-fixation"></div><div class="vstage-peripheral-target ${side}">●</div>`;
+    setTimeout(()=>{ const t=document.querySelector('.vstage-peripheral-target'); if(t) t.style.visibility="hidden"; }, vLive.cfg.exposureMs);
+    vLive.awaiting = true;
+    document.getElementById('vsub').innerHTML = `<div class="answer-grid"><button class="answer-btn" data-val="left" onclick="vAnswerMC('left','${side}')">← Left</button><button class="answer-btn" data-val="right" onclick="vAnswerMC('right','${side}')">Right →</button></div>`;
+    vLive.timer = setTimeout(()=>{ if(vLive && vLive.awaiting) vAnswerMC('none', side); }, 1400);
+  }, delay);
+}
+
+/* -- Reaction Gate: go/no-go -- */
+function vStartReaction(){
+  vStage().innerHTML = `<div class="vstage-msg">Wait...</div>`;
+  const delay = 500 + Math.random()*1000;
+  vLive.timer = setTimeout(()=>{
+    if(!vLive) return;
+    const isGo = Math.random() > vLive.cfg.noGoRatio;
+    vLive.isGo = isGo;
+    vLive.tapped = false;
+    vLive.awaiting = true;
+    vStage().innerHTML = `<div class="vstage-reaction-dot ${isGo?'go':'nogo'}" onclick="vTapReaction()"></div>`;
+    vLive.timer = setTimeout(()=>{ if(vLive && vLive.awaiting) vResolveReaction(); }, vLive.cfg.window);
+  }, delay);
+}
+function vTapReaction(){
+  if(!vLive || !vLive.awaiting) return;
+  vLive.tapped = true;
+  vResolveReaction();
+}
+function vResolveReaction(){
+  if(!vLive || !vLive.awaiting) return;
+  vLive.awaiting = false;
+  clearTimeout(vLive.timer);
+  const correct = vLive.isGo ? vLive.tapped : !vLive.tapped;
+  vEndRep(correct, correct ? "Nice" : (vLive.isGo ? "Too slow" : "False start"));
+}
+
+/* -- Track the Ball: dynamic tracking + timing -- */
+function vStartTrackBall(){
+  vStage().innerHTML = `<div class="vstage-zone"></div><div class="vstage-ball" id="vball"></div>`;
+  const ball = document.getElementById('vball');
+  const dur = vLive.cfg.durationMs;
+  vLive.awaiting = true;
+  vLive.idealAt = Date.now() + dur;
+  ball.onclick = ()=> vResolveTrack(Date.now());
+  requestAnimationFrame(()=>{ ball.style.transition = `left ${dur}ms linear`; ball.style.left = "88%"; });
+  vLive.timer = setTimeout(()=>{ if(vLive && vLive.awaiting) vResolveTrack(null); }, dur + 500);
+}
+function vResolveTrack(tapTime){
+  if(!vLive || !vLive.awaiting) return;
+  vLive.awaiting = false;
+  clearTimeout(vLive.timer);
+  const delta = tapTime ? (tapTime - vLive.idealAt) : 9999;
+  const correct = Math.abs(delta) <= 220;
+  const label = !tapTime ? "Missed" : (correct ? "Perfect timing" : (delta<0 ? "Too early" : "Too late"));
+  vEndRep(correct, label);
+}
+
+/* -- Pitch ID: occluded trajectory + call the pitch -- */
+const PITCH_TYPES = [
+  { id:"FB", label:"Fastball", top:50, ease:"linear", speedMul:1 },
+  { id:"CH", label:"Changeup", top:50, ease:"linear", speedMul:1.18 },
+  { id:"SL", label:"Slider", top:62, ease:"ease-in", speedMul:1 },
+  { id:"CB", label:"Curveball", top:78, ease:"ease-in", speedMul:1 },
+];
+function vStartPitchId(){
+  const pool = PITCH_TYPES.slice(0, vLive.cfg.types);
+  const pitch = pool[Math.floor(Math.random()*pool.length)];
+  const dur = Math.round(vLive.cfg.durationMs * pitch.speedMul);
+  vStage().innerHTML = `<div class="vstage-ball" id="vball" style="top:50%;"></div>`;
+  const ball = document.getElementById('vball');
+  ball.style.transition = `left ${dur}ms ${pitch.ease}, top ${dur}ms ${pitch.ease}`;
+  requestAnimationFrame(()=>{ ball.style.left="90%"; ball.style.top = pitch.top+"%"; });
+  const occludeMs = Math.round(dur * vLive.cfg.occludeFrac);
+  vLive.awaiting = true;
+  vLive.timer = setTimeout(()=>{
+    if(!vLive) return;
+    const b = document.getElementById('vball'); if(b) b.style.opacity = "0";
+    document.getElementById('vsub').innerHTML = `<div class="answer-grid">${pool.map(p=>`<button class="answer-btn" data-val="${p.label}" onclick="vAnswerMC('${p.label}','${pitch.label}')">${p.label}</button>`).join("")}</div>`;
+  }, occludeMs);
+}
+
+/* -- shared multiple-choice resolver (flash-recall, peripheral, pitch-id) -- */
+function vAnswerMC(choice, answer){
+  if(!vLive || !vLive.awaiting) return;
+  vLive.awaiting = false;
+  clearTimeout(vLive.timer);
+  const correct = choice === answer;
+  document.querySelectorAll('#vsub .answer-btn').forEach(b=>{
+    b.onclick = null;
+    if(b.dataset.val === answer) b.classList.add('correct');
+    else if(b.dataset.val === choice) b.classList.add('wrong');
+  });
+  vEndRep(correct);
+}
+
+function vEndRep(correct, label){
+  if(!vLive) return;
+  if(correct) vLive.correct++;
+  vLive.repIdx++;
+  const stage = vStage();
+  if(stage) stage.insertAdjacentHTML('beforeend', `<div class="vstage-result-flash ${correct?'good':'bad'}">${label||(correct?'Correct':'Miss')}</div>`);
+  setTimeout(()=>{
+    if(!vLive) return;
+    if(vLive.repIdx >= vLive.cfg.reps) vFinishSession();
+    else vStartRep();
+  }, 700);
+}
+
+function vFinishSession(){
+  const { id, level, correct, cfg } = vLive;
+  const pct = Math.round(100*correct/cfg.reps);
+  const vp = loadVisionProgress();
+  const p = vp[id];
+  p.sessions++;
+  if(pct > p.bestScore) p.bestScore = pct;
+  const leveledUp = pct >= 80 && level < 5;
+  if(leveledUp) p.level = level+1;
+  saveVisionProgress(vp);
+  const m = visionModule(id);
+  const root = vRoot();
+  if(root) root.innerHTML = `
+    <div class="vstage-wrap" style="text-align:center;">
+      <div class="module-card-name" style="font-size:20px;margin-bottom:6px;">${pct}% — ${correct}/${cfg.reps} correct</div>
+      <div class="vstage-msg">${leveledUp ? `Level up! You're now Level ${p.level} on ${m.name}.` : (pct>=80 ? "Great session." : "Keep at it — 80% clears this level.")}</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
+        <button class="btn btn-primary" style="width:auto;padding:10px 20px;" onclick="startVisionSession('${id}')">Play Again</button>
+        <button class="btn btn-ghost" style="width:auto;padding:10px 20px;" onclick="go('vision-lab')">Back to Vision Lab</button>
+      </div>
+    </div>`;
+  vLive = null;
+}
+
+/* ==================== Game IQ ==================== */
+// Situational rules pulled from researched baseball defensive/offensive
+// strategy (cutoff assignments, infield-in vs no-doubles, hitter's-count
+// approach) -- each question's "why" cites the actual rule, not a guess.
+
+const GIQ_FIELDS = ["left field","center field","right field"];
+function giqRunnerLabel(runners){
+  if(!runners.length) return "bases empty";
+  const names={1:"1st",2:"2nd",3:"3rd"};
+  return "runner"+(runners.length>1?'s':'')+" on "+runners.map(b=>names[b]).join(" & ");
+}
+function giqScenarioTags(s){
+  return [`${s.outs} out${s.outs===1?'':'s'}`, giqRunnerLabel(s.runners), `${s.balls}-${s.strikes} count`];
+}
+function giqRandRunners(level){
+  if(level<=1) return [];
+  if(level===2) return [[1,2,3][Math.floor(Math.random()*3)]];
+  const out=[]; [1,2,3].forEach(b=>{ if(Math.random()<0.45) out.push(b); });
+  return out;
+}
+function giqRandScenario(level){
+  return {
+    outs: Math.floor(Math.random()*3),
+    runners: giqRandRunners(level),
+    balls: Math.floor(Math.random()*4),
+    strikes: Math.floor(Math.random()*3),
+    field: GIQ_FIELDS[Math.floor(Math.random()*3)],
+    lateAndClose: Math.random()<0.35,
+  };
+}
+
+const GIQ_QUESTIONS = [
+  { type:"cutoff",
+    // Runner on 1st (nobody on 2nd) -> SS is cutoff to 3rd. Runner on 2nd ->
+    // 3B is cutoff at home. (probaseballinsider.com cutoff/relay positioning)
+    applies:(s)=> s.runners.includes(1) || s.runners.includes(2),
+    build:(s)=>{
+      const toThird = s.runners.includes(1) && !s.runners.includes(2);
+      const correct = toThird ? "Shortstop" : "Third baseman";
+      const why = toThird
+        ? "With a runner on 1st (and nobody on 2nd), the shortstop is the cutoff man lining up the throw to 3rd base."
+        : "With a runner on 2nd base, the third baseman becomes the cutoff man lining up the throw to home plate.";
+      return { prompt:`Ball hit into the gap in ${s.field}, ${giqRunnerLabel(s.runners)}. Who's the cutoff man?`,
+        choices:["Shortstop","Third baseman","Second baseman","First baseman"], correct, why };
+    } },
+  { type:"depth",
+    // <2 outs: infield in to cut the run at home. 2 outs: normal depth,
+    // any out anywhere ends the inning. Late/close: no-doubles overrides
+    // infield-in to protect against extra bases instead. (infield
+    // positioning research: infield-in vs no-doubles)
+    applies:(s)=> s.runners.includes(3),
+    build:(s)=>{
+      let correct, why;
+      if(s.outs===2){ correct="Normal depth"; why="With 2 outs, any out anywhere ends the inning -- no reason to sacrifice range by playing in. Infielders play back at normal depth."; }
+      else if(s.lateAndClose){ correct="No-doubles"; why="Late and close with the tying or go-ahead run in play, preventing extra bases matters more than cutting the run at the plate -- corners guard the lines, everyone plays back, nothing gets past for extra bases."; }
+      else { correct="Infield in"; why="Fewer than 2 outs with a runner on 3rd -- the infield plays in for a shot at cutting the run down at home plate on a ground ball."; }
+      return { prompt:`Runner on 3rd, ${s.outs} out${s.outs===1?'':'s'}${s.lateAndClose?', late innings, tight score':''}. Where does the infield play?`,
+        choices:["Infield in","No-doubles","Normal depth","Double-play depth"], correct, why };
+    } },
+  { type:"coverage",
+    // Mirror-side rule: the infielder on the far side from the hit covers
+    // 2nd since the near-side infielder goes out for the relay.
+    applies:(s)=> s.runners.includes(1) && !s.runners.includes(2) && !s.runners.includes(3),
+    build:(s)=>{
+      const nearLeft = s.field === "left field";
+      const correct = nearLeft ? "Second baseman" : "Shortstop";
+      const why = nearLeft
+        ? "On a ball hit to left field, the shortstop is the one going out for the relay, so the second baseman covers the bag."
+        : "On a ball hit to center or right field, the second baseman is the one going out for the relay, so the shortstop covers the bag.";
+      return { prompt:`Runner on 1st, ball put in play to ${s.field}. Who covers 2nd base for the throw?`,
+        choices:["Shortstop","Second baseman","Third baseman","Center fielder"], correct, why };
+    } },
+  { type:"count",
+    // 2 strikes -> defensive/contact approach. 3 balls (not full count) ->
+    // most extreme hitter's count, take unless it's a pitch to drive.
+    // Ahead with <2 strikes -> "fastball count," hunt your pitch. Even ->
+    // stay balanced. (hitter's-count / pitcher's-count research)
+    applies:()=> true,
+    build:(s)=>{
+      let correct, why;
+      if(s.strikes===2){ correct="Two-strike approach — shorten up, cover the zone"; why="With two strikes the priority flips from damage to survival: shorten the swing, cut down any leg kick, cover more of the plate, and be ready to foul off a tough pitch instead of chasing."; }
+      else if(s.balls===3){ correct="Take unless it's a get-me-over strike"; why="3-ball counts short of full are the most extreme hitter's counts -- the pitcher is under the most pressure to throw a strike, so unless it's a pitch you can drive, taking keeps the pressure on."; }
+      else if(s.balls > s.strikes){ correct="Hunt your pitch — sit fastball in your zone"; why="Hitter's counts (ahead with fewer than 2 strikes) are “fastball counts” -- the pitcher doesn't want to fall further behind, so you can commit early to the pitch and zone you do the most damage on."; }
+      else { correct="Stay balanced — still look for your pitch"; why="Even counts (0-0, 1-1) don't favor either side yet -- stick with your normal approach and zone rather than expanding or guessing."; }
+      return { prompt:`You're at the plate, ${s.balls}-${s.strikes} count${s.runners.length?`, ${giqRunnerLabel(s.runners)}`:''}. What's your approach?`,
+        choices:["Hunt your pitch — sit fastball in your zone","Two-strike approach — shorten up, cover the zone","Take unless it's a get-me-over strike","Stay balanced — still look for your pitch"], correct, why };
+    } },
+];
+
+function giqLevelFor(correctCount){
+  if(correctCount>=25) return 3;
+  if(correctCount>=10) return 2;
+  return 1;
+}
+function giqPickQuestion(level){
+  for(let tries=0; tries<20; tries++){
+    const s = giqRandScenario(level);
+    const pool = GIQ_QUESTIONS.filter(q=>{
+      if(level<=1) return q.type==='count';
+      if(level===2) return q.type!=='depth';
+      return true;
+    }).filter(q=>q.applies(s));
+    if(pool.length){
+      const q = pool[Math.floor(Math.random()*pool.length)];
+      return { scenario:s, q:q.build(s) };
+    }
+  }
+  const s = giqRandScenario(level);
+  const q = GIQ_QUESTIONS.find(x=>x.type==='count');
+  return { scenario:s, q:q.build(s) };
+}
+
+function renderGameIqPage(){
+  let html = `<div class="page-head"><div class="crumbs"><a href="#" onclick="go('games');return false;" style="color:var(--accent);">Games</a></div><h1>Game IQ</h1><div class="sub">Real in-game situations -- cutoffs, infield depth, coverage, and what to hunt based on the count. The "why" shows after every answer.</div></div>`;
+  html += `<div id="giq-root"></div>`;
+  setTimeout(()=> giqShowIntro(), 0);
+  return html;
+}
+function giqRoot(){ return document.getElementById('giq-root'); }
+let giqCurrent = null;
+
+function giqShowIntro(){
+  const root = giqRoot(); if(!root) return;
+  const gp = loadGameIqProgress();
+  const acc = gp.answered ? Math.round(100*gp.correct/gp.answered) : 0;
+  root.innerHTML = `
+    <div class="giq-stat-row">
+      <div class="giq-stat"><div class="n">${gp.level}</div><div class="l">Level</div></div>
+      <div class="giq-stat"><div class="n">${acc}%</div><div class="l">Accuracy</div></div>
+      <div class="giq-stat"><div class="n">${gp.bestStreak}</div><div class="l">Best streak</div></div>
+    </div>
+    <div class="vstage-wrap">
+      <div class="vstage-msg">${gp.answered ? `You've answered ${gp.answered} situations so far. Keep building your streak.` : "New here -- start with count-based situations; cutoffs, coverage, and infield depth unlock as your level goes up."}</div>
+      <button class="btn btn-primary" style="width:auto;padding:10px 24px;margin-top:14px;" onclick="giqNext()">${gp.answered?'Continue':'Start'}</button>
+    </div>`;
+}
+
+function giqNext(){
+  const gp = loadGameIqProgress();
+  giqCurrent = giqPickQuestion(gp.level);
+  const { scenario, q } = giqCurrent;
+  const root = giqRoot(); if(!root) return;
+  root.innerHTML = `
+    <div class="scenario-tags">${giqScenarioTags(scenario).map(t=>`<span class="scenario-tag">${t}</span>`).join("")}</div>
+    <div class="scenario-box">${q.prompt}</div>
+    <div class="answer-grid">${q.choices.map(c=>`<button class="answer-btn" data-val="${c.replace(/"/g,'&quot;')}" onclick="giqAnswer('${c.replace(/'/g,"\\'")}')">${c}</button>`).join("")}</div>
+    <div id="giq-explain"></div>`;
+}
+
+function giqAnswer(choice){
+  if(!giqCurrent || giqCurrent.answered) return;
+  giqCurrent.answered = true;
+  const { q } = giqCurrent;
+  const correct = choice === q.correct;
+  document.querySelectorAll('#giq-root .answer-btn').forEach(b=>{
+    b.onclick = null;
+    if(b.dataset.val === q.correct) b.classList.add('correct');
+    else if(b.dataset.val === choice) b.classList.add('wrong');
+  });
+  const gp = loadGameIqProgress();
+  gp.answered++;
+  if(correct){ gp.correct++; gp.streak++; if(gp.streak>gp.bestStreak) gp.bestStreak=gp.streak; }
+  else { gp.streak = 0; }
+  gp.level = giqLevelFor(gp.correct);
+  saveGameIqProgress(gp);
+  const explain = document.getElementById('giq-explain');
+  if(explain) explain.innerHTML = `<div class="explain-box"><strong>${correct?'Correct.':'Not quite.'}</strong> ${q.why}</div><button class="btn btn-ghost" style="width:auto;padding:10px 20px;margin-top:12px;" onclick="giqNext()">Next situation →</button>`;
 }
 
 /* ---------------------- Boot ------------------------------------------------- */
