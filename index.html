@@ -371,6 +371,19 @@ input,select{font-family:inherit;}
 .vstage-reaction-dot.nogo{background:var(--red);}
 .vstage-ball{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--accent);top:50%;left:4%;transform:translateY(-50%);}
 .vstage-zone{position:absolute;top:0;bottom:0;width:14%;right:8%;background:rgba(46,216,229,0.1);border-left:2px dashed var(--accent);border-right:2px dashed var(--accent);}
+/* v34: real-seam baseball for Pitch ID (Josh: "a real baseball to view seams") --
+   spin style/speed per pitch type mirrors the actual spin cues hitters are
+   taught to read: fastball backspin, curveball's slow 12-6 tumble, slider's
+   fast spin + visible "red dot", changeup sharing the fastball look but slower. */
+.vstage-baseball{position:absolute;width:26px;height:26px;top:50%;left:4%;transform:translateY(-50%);}
+.vstage-baseball svg{width:100%;height:100%;display:block;}
+.vstage-baseball.spin-FB svg,.vstage-baseball.spin-CH svg{animation:seam-spin-fb 0.35s linear infinite;}
+.vstage-baseball.spin-CB svg{animation:seam-spin-cb 0.7s linear infinite;}
+.vstage-baseball.spin-SL svg{animation:seam-spin-sl 0.22s linear infinite;}
+.pitch-reddot{position:absolute;width:5px;height:5px;border-radius:50%;background:#e01e1e;top:7px;left:7px;box-shadow:0 0 2px rgba(0,0,0,0.6);}
+@keyframes seam-spin-fb{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes seam-spin-cb{from{transform:rotateX(0deg);}to{transform:rotateX(360deg);}}
+@keyframes seam-spin-sl{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
 .vstage-result-flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:0.05em;background:rgba(10,10,13,0.55);}
 .vstage-result-flash.good{color:var(--green);}
 .vstage-result-flash.bad{color:var(--red);}
@@ -1114,6 +1127,105 @@ function discardSwingVideo(){
   if(swingVideoUrl) URL.revokeObjectURL(swingVideoUrl);
   swingVideoUrl = null; swingVideoName = ""; swingMarks = {}; swingKeyState = {};
   go("dashboard");
+}
+
+/* ---------------------- v34: swing pose auto-check ------------------------
+   Josh: "is there a way for the app to be able to analyze the video and
+   give feedback based on the hitting positions?" Yes, with a scoped, honest
+   answer -- runs entirely on-device via Google's MediaPipe Pose Landmarker
+   (@mediapipe/tasks-vision, loaded from CDN only when this button is
+   pressed, so it never slows down the rest of the app). The video never
+   leaves the device -- same privacy model as the rest of this feature.
+   Scope is deliberately narrow: 2D landmarks from a single handheld-phone
+   camera angle can't reliably grade most of the HITTING_RUBRIC's checks
+   (hand position in the fingers vs palm, bat path -- those need hand/object
+   tracking this model doesn't do). What IS reliably computable from
+   shoulder/hip landmarks is hip-shoulder separation, the "X-factor" stretch
+   -- a real, published biomechanics metric (elite range roughly 30-55 deg
+   at load, collapsing sharply by release/contact as the hips fire first and
+   the shoulders release after). So that's what this checks, using the
+   Position 2 (Ready to Hit) and Position 4 (Contact) marks the athlete
+   already sets -- shown with the actual skeleton overlay drawn on the real
+   frame so it's inspectable, not a black-box number. */
+let poseLandmarkerInstance = null;
+async function getPoseLandmarker(){
+  if(poseLandmarkerInstance) return poseLandmarkerInstance;
+  const mod = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14");
+  const files = await mod.FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+  const modelAssetPath = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+  try{
+    poseLandmarkerInstance = await mod.PoseLandmarker.createFromOptions(files, {
+      baseOptions:{ modelAssetPath, delegate:"GPU" }, runningMode:"IMAGE"
+    });
+  }catch(e){
+    poseLandmarkerInstance = await mod.PoseLandmarker.createFromOptions(files, {
+      baseOptions:{ modelAssetPath, delegate:"CPU" }, runningMode:"IMAGE"
+    });
+  }
+  return poseLandmarkerInstance;
+}
+function seekVideoTo(video, t){
+  return new Promise(resolve=>{
+    function onSeeked(){ video.removeEventListener('seeked', onSeeked); resolve(); }
+    video.addEventListener('seeked', onSeeked);
+    video.currentTime = t;
+  });
+}
+function angleDeg(ax,ay,bx,by){ return Math.atan2(by-ay, bx-ax) * 180/Math.PI; }
+function foldSeparation(shoulderDeg, hipDeg){
+  let d = Math.abs(shoulderDeg - hipDeg) % 180;
+  if(d > 90) d = 180 - d;
+  return d;
+}
+async function captureFramePose(video, t, canvasId){
+  await seekVideoTo(video, t);
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return null;
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const landmarker = await getPoseLandmarker();
+  const result = landmarker.detect(canvas);
+  const lm = result.landmarks && result.landmarks[0];
+  if(!lm) return null;
+  const lSh = lm[11], rSh = lm[12], lHip = lm[23], rHip = lm[24];
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#2ED8E5';
+  ctx.beginPath(); ctx.moveTo(lSh.x*canvas.width, lSh.y*canvas.height); ctx.lineTo(rSh.x*canvas.width, rSh.y*canvas.height); ctx.stroke();
+  ctx.strokeStyle = '#FFC107';
+  ctx.beginPath(); ctx.moveTo(lHip.x*canvas.width, lHip.y*canvas.height); ctx.lineTo(rHip.x*canvas.width, rHip.y*canvas.height); ctx.stroke();
+  ctx.fillStyle = '#fff';
+  [lSh,rSh,lHip,rHip].forEach(p=>{ ctx.beginPath(); ctx.arc(p.x*canvas.width, p.y*canvas.height, 5, 0, Math.PI*2); ctx.fill(); });
+  const shoulderAngle = angleDeg(lSh.x, lSh.y, rSh.x, rSh.y);
+  const hipAngle = angleDeg(lHip.x, lHip.y, rHip.x, rHip.y);
+  const visibility = Math.min(lSh.visibility!=null?lSh.visibility:1, rSh.visibility!=null?rSh.visibility:1, lHip.visibility!=null?lHip.visibility:1, rHip.visibility!=null?rHip.visibility:1);
+  return { separation: foldSeparation(shoulderAngle, hipAngle), visibility };
+}
+async function runSwingAutoCheck(){
+  const video = document.getElementById('swing-video');
+  const resultsEl = document.getElementById('autocheck-results');
+  if(!video || !resultsEl) return;
+  resultsEl.innerHTML = `<div class="phil-text" style="font-size:12.5px;">Loading the pose model and analyzing your frames... (first run downloads a few MB, one time only.)</div>`;
+  const savedTime = video.currentTime;
+  try{
+    const loadPose = await captureFramePose(video, swingMarks[2], 'autocheck-canvas-load');
+    const contactPose = await captureFramePose(video, swingMarks[4], 'autocheck-canvas-contact');
+    video.currentTime = savedTime;
+    if(!loadPose || !contactPose){
+      resultsEl.innerHTML = `<div class="explain-box">Couldn't get a clear read on both frames &mdash; try a video where your hips and shoulders are both clearly visible (face-on or down-the-line angle works best).</div>`;
+      return;
+    }
+    const drop = loadPose.separation - contactPose.separation;
+    const verdict = drop >= 15
+      ? `Good separation and sequencing &mdash; hips lead, shoulders stay back, then release. Separation went from about ${Math.round(loadPose.separation)}&deg; at load to about ${Math.round(contactPose.separation)}&deg; at contact.`
+      : `Limited separation detected &mdash; hips and shoulders look like they're rotating closer to together rather than hips leading. Separation was about ${Math.round(loadPose.separation)}&deg; at load and ${Math.round(contactPose.separation)}&deg; at contact (elite swings usually show a bigger drop from load to contact).`;
+    const lowConfidence = loadPose.visibility < 0.5 || contactPose.visibility < 0.5;
+    resultsEl.innerHTML = `
+      <div class="explain-box"><strong>${drop>=15?'On track.':'Worth a look.'}</strong> ${verdict}${lowConfidence ? ' Some landmarks were low-confidence on this video, so take this as a rough read.' : ''}</div>
+      <div class="hint" style="margin-top:8px;">This checks hip-shoulder separation (the "X-factor" stretch) using the Ready to Hit and Contact frames &mdash; it's one real, measurable swing metric, not a full mechanics grade. Cyan line = shoulders, gold line = hips.</div>`;
+  }catch(e){
+    resultsEl.innerHTML = `<div class="explain-box">Auto-check couldn't run in this browser (${e.message}). The manual checklist above still works fine.</div>`;
+  }
 }
 
 /* ---------------------- v3 state: bat program, S&C progress, daily plan --- */
@@ -2839,6 +2951,18 @@ function renderDashboard(){
         </div>
       </div>`;
     }).join("");
+    html += `<div class="card-tag" style="margin:18px 0 8px;">Auto-Check (beta)</div>`;
+    if(swingMarks[2]!==undefined && swingMarks[4]!==undefined){
+      html += `<div class="phil-text" style="font-size:12.5px;margin-bottom:10px;">Runs on-device pose detection against your Ready to Hit and Contact frames and checks hip-shoulder separation &mdash; a real swing metric, not a full mechanics grade. Nothing leaves your device.</div>
+        <button class="btn btn-ghost" style="width:auto;padding:8px 16px;font-size:12px;margin-bottom:10px;" onclick="runSwingAutoCheck()">Run Auto-Check</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <canvas id="autocheck-canvas-load" style="max-width:47%;border-radius:2px;border:1px solid var(--border);"></canvas>
+          <canvas id="autocheck-canvas-contact" style="max-width:47%;border-radius:2px;border:1px solid var(--border);"></canvas>
+        </div>
+        <div id="autocheck-results"></div>`;
+    } else {
+      html += `<div class="phil-text" style="font-size:12.5px;">Mark Position 2 (Ready to Hit) and Position 4 (Contact) above to unlock an on-device check of your hip-shoulder separation.</div>`;
+    }
     html += `<div style="display:flex;gap:10px;margin-top:16px;">
       <button class="btn btn-primary" style="width:auto;padding:9px 18px;" onclick="saveSwingCheck()">Save check</button>
       <button class="btn btn-ghost" style="width:auto;padding:9px 18px;" onclick="discardSwingVideo()">Discard</button>
@@ -3175,16 +3299,24 @@ function vResolveReaction(){
   vEndRep(correct, correct ? "Nice" : (vLive.isGo ? "Too slow" : "False start"));
 }
 
-/* -- Track the Ball: dynamic tracking + timing -- */
+/* -- Track the Ball: dynamic tracking + timing --
+   v34: Josh found tapping the small moving ball itself confusing (easy to
+   miss where to touch). Swapped for a big stationary HIT button below the
+   stage -- same timing logic, just a fixed, always-in-the-same-place target
+   instead of a moving one. */
 function vStartTrackBall(){
   vStage().innerHTML = `<div class="vstage-zone"></div><div class="vstage-ball" id="vball"></div>`;
+  document.getElementById('vsub').innerHTML = `<button class="big-tap-zone" onclick="vTapTrackHit()">HIT</button>`;
   const ball = document.getElementById('vball');
   const dur = vLive.cfg.durationMs;
   vLive.awaiting = true;
   vLive.idealAt = Date.now() + dur;
-  ball.onclick = ()=> vResolveTrack(Date.now());
   requestAnimationFrame(()=>{ ball.style.transition = `left ${dur}ms linear`; ball.style.left = "88%"; });
   vLive.timer = setTimeout(()=>{ if(vLive && vLive.awaiting) vResolveTrack(null); }, dur + 500);
+}
+function vTapTrackHit(){
+  if(!vLive || !vLive.awaiting) return;
+  vResolveTrack(Date.now());
 }
 function vResolveTrack(tapTime){
   if(!vLive || !vLive.awaiting) return;
@@ -3196,18 +3328,30 @@ function vResolveTrack(tapTime){
   vEndRep(correct, label);
 }
 
-/* -- Pitch ID: occluded trajectory + call the pitch -- */
+/* -- Pitch ID: occluded trajectory + call the pitch --
+   v34: Josh asked for a real baseball with visible seams instead of a plain
+   dot. Licensed pitcher footage isn't something we can embed (same "nothing
+   external, nothing licensed" constraint the whole app runs on), but the
+   actual skill being trained -- reading spin off the seams in the first
+   ~15 feet -- is well documented, so the ball itself now shows real seams
+   and spins with the real signature per pitch type: fastball backspin reads
+   near straight-up "12:00" rotation, curveball is the topspin "12-6 flip"
+   (slower, tumbling), slider shows the glove-side "red dot" hitters are
+   taught to look for, changeup spins like a fastball but visibly slower
+   (it's a timing pitch, not a movement pitch -- matches the speedMul below). */
 const PITCH_TYPES = [
   { id:"FB", label:"Fastball", top:50, ease:"linear", speedMul:1 },
   { id:"CH", label:"Changeup", top:50, ease:"linear", speedMul:1.18 },
   { id:"SL", label:"Slider", top:62, ease:"ease-in", speedMul:1 },
   { id:"CB", label:"Curveball", top:78, ease:"ease-in", speedMul:1 },
 ];
+const BASEBALL_SVG = `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#f4f2ee" stroke="#a8a8a8" stroke-width="0.75"/><path d="M8,5 Q22,20 8,35" fill="none" stroke="#c0392b" stroke-width="2"/><path d="M32,5 Q18,20 32,35" fill="none" stroke="#c0392b" stroke-width="2"/></svg>`;
 function vStartPitchId(){
   const pool = PITCH_TYPES.slice(0, vLive.cfg.types);
   const pitch = pool[Math.floor(Math.random()*pool.length)];
   const dur = Math.round(vLive.cfg.durationMs * pitch.speedMul);
-  vStage().innerHTML = `<div class="vstage-ball" id="vball" style="top:50%;"></div>`;
+  const dotHtml = pitch.id === "SL" ? `<div class="pitch-reddot"></div>` : "";
+  vStage().innerHTML = `<div class="vstage-baseball spin-${pitch.id}" id="vball" style="top:50%;">${BASEBALL_SVG}${dotHtml}</div>`;
   const ball = document.getElementById('vball');
   ball.style.transition = `left ${dur}ms ${pitch.ease}, top ${dur}ms ${pitch.ease}`;
   requestAnimationFrame(()=>{ ball.style.left="90%"; ball.style.top = pitch.top+"%"; });
