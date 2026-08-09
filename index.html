@@ -423,6 +423,9 @@ input,select{font-family:inherit;}
       <input type="password" id="login-pass" placeholder="demo123">
     </div>
     <button class="btn btn-primary" onclick="doLogin()">Log in</button>
+    <div class="demo-row">
+      <button class="btn btn-ghost" onclick="tryDemo()">Try Demo (nothing saved)</button>
+    </div>
   </div>
 </div>
 
@@ -2096,14 +2099,25 @@ function toggleWeekly(w){
 // so tester1..tester5 automatically get fully separate progress/data with
 // zero extra plumbing — no separate backend needed for this stage.
 const USERS = {
+  // Master login -- Josh's own account, full coach view.
   josh:    { password:"demo123",  role:"coach",  name:"Josh Kalalau" },
   hitter1: { password:"demo123",  role:"hitter", name:"Alex Rivera", programId:"p1" },
-  tester1: { password:"beta2026", role:"hitter", name:"Beta Tester 1", programId:"p1" },
-  tester2: { password:"beta2026", role:"hitter", name:"Beta Tester 2", programId:"p1" },
-  tester3: { password:"beta2026", role:"hitter", name:"Beta Tester 3", programId:"p1" },
-  tester4: { password:"beta2026", role:"hitter", name:"Beta Tester 4", programId:"p1" },
-  tester5: { password:"beta2026", role:"hitter", name:"Beta Tester 5", programId:"p1" },
+  // v35: Josh -- "give me a master log in and then create a demo login and
+  // 50 tester log ins. demo log in doesnt save anything". The login screen
+  // used to show an error pointing people at "the demo buttons below" that
+  // didn't actually exist -- this is the real thing. isDemo flag is read in
+  // doLogin()/signOut() to wipe that account's localStorage on every login
+  // and every sign-out, so nothing a demo user does ever sticks around for
+  // the next person to try it on a shared device.
+  demo:    { password:"demo",     role:"hitter", name:"Demo User", programId:"p1", isDemo:true },
 };
+// v35: 50 beta tester accounts, same shared-password pattern as the original
+// 5 (tester1..tester5) -- each username is its own localStorage namespace
+// (see session.username usage throughout), so testers automatically get
+// fully separate progress with zero extra plumbing.
+for(let i = 1; i <= 50; i++){
+  USERS["tester" + i] = { password:"beta2026", role:"hitter", name:"Beta Tester " + i, programId:"p1" };
+}
 
 /* ---------------------- Program (coach template + hitter view) --------- */
 
@@ -2147,24 +2161,35 @@ let currentWeek = 1;
 
 /* ---------------------- Auth ---------------------------------------------- */
 
+// v35: wipes every localStorage key namespaced to one username (the
+// "hp_<feature>_" + username pattern used throughout this file). Used to
+// keep the demo account stateless -- every demo session starts clean.
+function wipeUserData(u){
+  const marker = "_" + u;
+  Object.keys(localStorage).forEach(k => {
+    if(k.indexOf("hp_") === 0 && k.indexOf(marker) !== -1) localStorage.removeItem(k);
+  });
+}
 function doLogin(){
   const u = document.getElementById("login-user").value.trim();
   const p = document.getElementById("login-pass").value;
   const rec = USERS[u];
   if(!rec || rec.password !== p){
-    alert("No match for that username/password. Try the demo buttons below.");
+    alert("No match for that username/password. Try Demo below if you just want to look around.");
     return;
   }
+  if(rec.isDemo) wipeUserData(u); // fresh slate every time someone logs into demo
   session = { username:u, role:rec.role, name:rec.name, programId:rec.programId || "p1" };
   localStorage.setItem("hp_session", JSON.stringify(session));
   enterApp();
 }
-function quickLogin(u){
-  document.getElementById("login-user").value = u;
-  document.getElementById("login-pass").value = "demo123";
+function tryDemo(){
+  document.getElementById("login-user").value = "demo";
+  document.getElementById("login-pass").value = "demo";
   doLogin();
 }
 function signOut(){
+  if(session && USERS[session.username] && USERS[session.username].isDemo) wipeUserData(session.username);
   session = null;
   localStorage.removeItem("hp_session");
   document.getElementById("app-shell").classList.remove("active");
