@@ -543,12 +543,12 @@ const WARMUP = {
 const TEE = {
   intro: "Every day we hit, this rotation is the station work — six drills, run in order, each isolating one piece of the swing before it all comes together.",
   stations: [
-    { name:"1. Open Stance — Isolate the Hands", intent:"Isolate the hands and feel the path to the baseball.", cues:["Stance: open to match the third-base line angle off home plate","Tee position: between the feet","Hands only — no lower half"], video:null },
-    { name:"2. Closed Stance — Full Swing Out Front", intent:"Feel hitting the ball out front.", cues:["Stance: closed to match the first-base line angle off home plate","Tee position: out front of the lead foot, in line with the toes","Full swing"], video:null },
-    { name:"3. Rhythm Stance to Power Position — Back Hip Drive", intent:"Get to a 50/50 power position and check it before swinging.", cues:["Rhythm stance into power position, pause 3 seconds, check three things: feet in line, barrel over the button of the hat, hands held back as far as possible","After the check, swing — knee drives down and toward the front foot, back hip drives to the baseball"], video:null },
-    { name:"4. Beltre Drill — Lower Half Drive", intent:"Emphasize lower half drive to the baseball.", cues:[], video:null },
-    { name:"5. Hop Back Drill — Lower Half Drive", intent:"Emphasize lower half drive to the baseball.", cues:[], video:null },
-    { name:"6. Around the World — Bat Control", intent:"Work bat control across the whole field.", cues:["2x hard ground balls through the 4-hole","2x line drive to the right-center gap","2x line drive to the left-center gap","2x double down the line","Note: tee position is critical for each target — move it deliberately for every rep"], video:null },
+    { name:"1. Open Stance — Isolate the Hands", intent:"Isolate the hands and feel the path to the baseball.", cues:["Stance: open to match the third-base line angle off home plate","Tee position: between the feet","Hands only — no lower half"], video:"https://drive.google.com/file/d/1ZpK3UfjyYLActTDl5laVqvQaUH5COLOU/preview" },
+    { name:"2. Closed Stance — Full Swing Out Front", intent:"Feel hitting the ball out front.", cues:["Stance: closed to match the first-base line angle off home plate","Tee position: out front of the lead foot, in line with the toes","Full swing"], video:"https://drive.google.com/file/d/1KapDBve_dNP6mq3TUJOTbRZnSzPybmLi/preview" },
+    { name:"3. Rhythm Stance to Power Position — Back Hip Drive", intent:"Get to a 50/50 power position and check it before swinging.", cues:["Rhythm stance into power position, pause 3 seconds, check three things: feet in line, barrel over the button of the hat, hands held back as far as possible","After the check, swing — knee drives down and toward the front foot, back hip drives to the baseball"], video:"https://drive.google.com/file/d/1fqWnKvwieFNs-vPGPxsCViWHYqbHX4gX/preview" },
+    { name:"4. Beltre Drill — Lower Half Drive", intent:"Emphasize lower half drive to the baseball.", cues:[], video:"https://drive.google.com/file/d/1H-oQSTe0yU3WLT5GTawfLa6vwh6mb-wH/preview" },
+    { name:"5. Hop Back Drill — Lower Half Drive", intent:"Emphasize lower half drive to the baseball.", cues:[], video:"https://drive.google.com/file/d/1VjbXeSE-Z9kaoEjEr5PWPrAlV-win5FT/preview" },
+    { name:"6. Around the World — Bat Control", intent:"Work bat control across the whole field.", cues:["2x hard ground balls through the 4-hole","2x line drive to the right-center gap","2x line drive to the left-center gap","2x double down the line","Note: tee position is critical for each target — move it deliberately for every rep"], video:"https://drive.google.com/file/d/1_3ONbr2FanGNeTGhn10WaSxYoG1ub9jB/preview" },
   ]
 };
 // Flattened one-line-per-station labels — used wherever the app just needs a
@@ -590,17 +590,47 @@ function inlineVideoToggleBtn(key, catId, returnView, returnParam){
   const args = returnView ? `'${key}','${catId}','${returnView}'${returnParam!==undefined ? `,'${returnParam}'` : ''}` : `'${key}','${catId}'`;
   return `<button class="video-toggle-btn" onclick="toggleInlineVideo(${args})">${icon('play')}<span>${open ? 'Hide' : 'Watch'}</span></button>`;
 }
+// v37: Google Drive-hosted videos (request: "in this folder i have uploaded
+// tee progressions... let me know if this will work to upload from my
+// personal drive"). Josh chose to keep the tee-progression footage on Drive
+// rather than migrate to YouTube, so inlineVideoBody() needs a third source
+// type alongside direct files and YouTube. Any of Drive's share-link shapes
+// (file/d/{id}/view, open?id={id}, uc?id={id}) resolve to the same embeddable
+// /preview iframe URL. Requires the file (or its parent folder) be shared as
+// "Anyone with the link" — otherwise viewers see Drive's access-denied screen
+// instead of the video.
+function googleDriveFileId(url){
+  const m = /drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([A-Za-z0-9_-]{10,})/i.exec(url);
+  return m ? m[1] : null;
+}
 function inlineVideoBody(url){
   if(!url) return `<div class="video-empty-inline">No video added yet — this slot is ready as soon as one is uploaded.</div>`;
   if(isDirectVideoFile(url)) return `<video src="${url}" controls playsinline style="width:100%;border-radius:2px;margin-top:8px;background:#000;"></video>`;
   const ytId = youTubeEmbedId(url);
   if(ytId) return `<div style="position:relative;width:100%;padding-top:56.25%;margin-top:8px;border-radius:2px;overflow:hidden;background:#000;"><iframe src="https://www.youtube.com/embed/${ytId}" title="Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;"></iframe></div>`;
+  const driveId = googleDriveFileId(url);
+  if(driveId) return `<div style="position:relative;width:100%;padding-top:56.25%;margin-top:8px;border-radius:2px;overflow:hidden;background:#000;"><iframe src="https://drive.google.com/file/d/${driveId}/preview" title="Video" frameborder="0" allow="autoplay" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;"></iframe></div>`;
   return `<a href="${url}" target="_blank" rel="noopener" class="video-link-inline">Watch video &#8599;</a>`;
 }
+
+// v37: drills can be a plain string (name only, no footage yet) or an
+// {name, video} object (request: "We can also upload these to the hitting
+// drills just in the tee work tab. then also add the sosa progression").
+// These two helpers let every render/compare site below treat both shapes
+// the same way instead of special-casing objects everywhere.
+function drillName(d){ return typeof d === 'string' ? d : d.name; }
+function drillVideo(d){ return typeof d === 'string' ? null : (d.video || null); }
 
 // Hitting Workout — build-your-own-session drill pool, 6 categories (v2)
 const HITTING_DRILL_CATEGORIES = [
   { id:"tee", name:"Tee Work", desc:"Groove the swing pattern in a controlled environment.", drills:[
+    { name:"Open Stance — Isolate the Hands", video:"https://drive.google.com/file/d/1ZpK3UfjyYLActTDl5laVqvQaUH5COLOU/preview" },
+    { name:"Closed Stance — Full Swing Out Front", video:"https://drive.google.com/file/d/1KapDBve_dNP6mq3TUJOTbRZnSzPybmLi/preview" },
+    { name:"Rhythm Stance to Power Position — Back Hip Drive", video:"https://drive.google.com/file/d/1fqWnKvwieFNs-vPGPxsCViWHYqbHX4gX/preview" },
+    { name:"Beltre Drill — Lower Half Drive", video:"https://drive.google.com/file/d/1H-oQSTe0yU3WLT5GTawfLa6vwh6mb-wH/preview" },
+    { name:"Hop Back Drill — Lower Half Drive", video:"https://drive.google.com/file/d/1VjbXeSE-Z9kaoEjEr5PWPrAlV-win5FT/preview" },
+    { name:"Around the World — Bat Control", video:"https://drive.google.com/file/d/1_3ONbr2FanGNeTGhn10WaSxYoG1ub9jB/preview" },
+    { name:"Sosa Progression", video:"https://drive.google.com/file/d/1mxyhTP-kvvLild9a9da9KKY14fIomFEZ/preview" },
     "Dry load reps (no ball) — 3x10",
     "Stride-and-hold — 3x8",
     "Inside tee, pull gap — 3x10",
@@ -2003,7 +2033,7 @@ function saveDailyPicks(s){ localStorage.setItem(dailyPicksKey(), JSON.stringify
 function addToDailyPlan(catId, drillIdx){
   const cat = HITTING_DRILL_CATEGORIES.find(c => c.id === catId);
   const s = loadDailyPicks();
-  s.push({ catId, catName: cat.name, drill: cat.drills[drillIdx] });
+  s.push({ catId, catName: cat.name, drill: drillName(cat.drills[drillIdx]) });
   saveDailyPicks(s);
   go("drills-library");
 }
@@ -2057,7 +2087,8 @@ function completeHittingSession(){
 let videoModal = null;
 function openVideoModal(catId, drillIdx){
   const cat = HITTING_DRILL_CATEGORIES.find(c => c.id === catId);
-  videoModal = { catName: cat.name, drill: cat.drills[drillIdx] };
+  const d = cat.drills[drillIdx];
+  videoModal = { catName: cat.name, drill: drillName(d), video: drillVideo(d) };
   go("drills-library");
 }
 function closeVideoModal(){ videoModal = null; go("drills-library"); }
@@ -2336,7 +2367,7 @@ function renderCurrent(){
 function sampleItemsFor(catId){
   if(catId === "warmup") return WARMUP.categories.flatMap(c => c.items.map(i => ({name:i.name, detail:c.name})));
   if(catId === "tee") return TEE.stations.map(s => ({name:s.name, detail:s.intent}));
-  if(catId === "hittingworkout") return HITTING_DRILL_CATEGORIES.flatMap(c => c.drills.map(d => ({name:d, detail:c.name})));
+  if(catId === "hittingworkout") return HITTING_DRILL_CATEGORIES.flatMap(c => c.drills.map(d => ({name:drillName(d), detail:c.name})));
   if(catId === "strength"){
     const day = STRENGTH.offSeason.blocks[0].days[0];
     return day.items.map(i => ({name:i.name, detail:(i.sets||"")+(i.note?" — "+i.note:"")}));
@@ -2488,7 +2519,7 @@ function setHwCategory(id){ hwCategory = id; go("hitting-workout"); }
 function addToSession(catId, drillIdx){
   const cat = HITTING_DRILL_CATEGORIES.find(c => c.id === catId);
   const s = loadHwSession();
-  s.push({ catId, catName: cat.name, drill: cat.drills[drillIdx] });
+  s.push({ catId, catName: cat.name, drill: drillName(cat.drills[drillIdx]) });
   saveHwSession(s);
   go("hitting-workout");
 }
@@ -2533,8 +2564,9 @@ function renderHittingWorkout(){
   const cat = HITTING_DRILL_CATEGORIES.find(c => c.id === hwCategory);
   html += `<div class="card"><div class="card-head"><div class="card-title">${cat.name}</div><div class="card-tag">${cat.desc}</div></div>`;
   html += cat.drills.map((d, i) => {
-    const already = s.some(x => x.catId === cat.id && x.drill === d);
-    return `<div class="drill-row"><span>${d}</span><button class="add-btn ${already?'added':''}" onclick="addToSession('${cat.id}',${i})">${already ? 'Added' : '+ Add'}</button></div>`;
+    const dn = drillName(d);
+    const already = s.some(x => x.catId === cat.id && x.drill === dn);
+    return `<div class="drill-row"><span>${dn}</span><button class="add-btn ${already?'added':''}" onclick="addToSession('${cat.id}',${i})">${already ? 'Added' : '+ Add'}</button></div>`;
   }).join("");
   html += `</div>`;
   return html;
@@ -2553,11 +2585,12 @@ function renderDrillsLibrary(){
   const cat = HITTING_DRILL_CATEGORIES.find(c => c.id === drillsCategory);
   html += `<div class="card-tag" style="margin-bottom:14px;">${cat.desc}</div>`;
   html += `<div class="lib-grid">` + cat.drills.map((d, i) => {
-    const already = picks.some(x => x.catId === cat.id && x.drill === d);
+    const dn = drillName(d);
+    const already = picks.some(x => x.catId === cat.id && x.drill === dn);
     return `<div class="video-card">
       <div class="video-thumb" onclick="openVideoModal('${cat.id}',${i})">${icon('target')}<span class="video-badge">Watch</span></div>
       <div class="video-info">
-        <div class="n">${d}</div>
+        <div class="n">${dn}</div>
         <div class="t">${cat.name}</div>
         <button class="add-btn ${already?'added':''}" style="margin-top:8px;width:100%;" onclick="addToDailyPlan('${cat.id}',${i})">${already ? 'Added to Plan' : '+ Add to Daily Plan'}</button>
       </div>
@@ -2568,7 +2601,7 @@ function renderDrillsLibrary(){
     html += `<div class="modal-overlay" onclick="if(event.target===this)closeVideoModal()">
       <div class="modal-card">
         <div class="card-head"><div class="card-title">${videoModal.drill}</div><button class="btn btn-ghost" style="width:auto;padding:6px 12px;font-size:12px;" onclick="closeVideoModal()">Close</button></div>
-        <div class="video-placeholder">${icon('target')}<div style="margin-top:10px;font-size:13px;color:var(--text-dim);">Video coming soon</div><div style="margin-top:4px;font-size:11.5px;color:var(--text-mute);">${videoModal.catName} — footage for this drill hasn't been uploaded yet.</div></div>
+        ${videoModal.video ? inlineVideoBody(videoModal.video) : `<div class="video-placeholder">${icon('target')}<div style="margin-top:10px;font-size:13px;color:var(--text-dim);">Video coming soon</div><div style="margin-top:4px;font-size:11.5px;color:var(--text-mute);">${videoModal.catName} — footage for this drill hasn't been uploaded yet.</div></div>`}
       </div>
     </div>`;
   }
