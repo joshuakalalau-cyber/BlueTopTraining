@@ -397,6 +397,20 @@ input,select{font-family:inherit;}
 .vstage-result-flash.bad{color:var(--red);}
 .answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .answer-btn{padding:14px;background:var(--panel2);border:1px solid var(--border);border-radius:2px;color:var(--text);font-size:14px;font-weight:700;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);}
+/* v40: .big-tap-zone was introduced in v34 for Track the Ball's HIT button but
+   never got a CSS rule -- it was rendering as a bare browser button. Pitch
+   ID's new SWING button (v40) reuses the same class, so it gets styled now. */
+.big-tap-zone{width:100%;padding:22px;border-radius:2px;background:var(--accent-fill);color:#fff;border:none;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(0,0,0,0.4);}
+.big-tap-zone:hover,.big-tap-zone:active{background:var(--accent-fill-hover);}
+.pitch-timing-result{text-align:center;padding:18px 16px;background:var(--panel);border:1px solid var(--border);border-radius:2px;}
+.ptr-label{font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-mute);}
+.ptr-gap{font-size:36px;font-weight:900;color:var(--text);margin:4px 0 12px;}
+.ptr-gap span{font-size:15px;font-weight:700;color:var(--text-dim);margin-left:4px;}
+.ptr-pill{display:inline-block;padding:6px 18px;border-radius:2px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;font-size:13px;margin-bottom:12px;}
+.ptr-pill.hit{background:rgba(47,191,113,0.14);color:var(--green);}
+.ptr-pill.miss{background:rgba(239,68,68,0.14);color:var(--red);}
+.ptr-line,.ptr-pitch,.ptr-optimal{font-size:13px;color:var(--text-dim);margin-top:6px;}
+.ptr-line b,.ptr-pitch b,.ptr-optimal b{color:var(--text);}
 .answer-btn:hover{border-color:var(--accent);}
 .answer-btn.correct{border-color:var(--green);color:var(--green);background:rgba(47,191,113,0.1);}
 .answer-btn.wrong{border-color:var(--red);color:var(--red);background:rgba(239,68,68,0.1);}
@@ -661,12 +675,10 @@ const HITTING_DRILL_CATEGORIES = [
     { name:"Hop Back Drill — Lower Half Drive", video:"https://youtube.com/shorts/5pUALOHLyqk" },
     { name:"Around the World — Bat Control", video:"https://youtube.com/shorts/zKxx5QzUSP4" },
     { name:"Sosa Progression", video:"https://youtube.com/shorts/2MWPT7CnKVQ" },
-    "Dry load reps (no ball) — 3x10",
-    "Stride-and-hold — 3x8",
-    "Inside tee, pull gap — 3x10",
-    "High tee, backspin drill — 3x10",
-    "3-tee ladder (in/middle/out) — 3x9",
-    "Backfoot tee — 3x8",
+    // v40: Josh -- "we can get rid of the rest of the videos in tee work,
+    // keep just the ones we just uploaded. ill add as i go." The old
+    // placeholder text-only drills (no footage) are gone; this list now
+    // holds only real, filmed drills and grows as Josh uploads more.
   ]},
   { id:"fronttoss", name:"Front Toss", desc:"Layer timing and rhythm on top of the pattern.", drills:[
     "Rhythm toss, varied speeds — 3x10",
@@ -3178,8 +3190,8 @@ const VISION_MODULES = [
     tagline:"Follow it all the way into the zone.",
     blurb:"Dynamic visual tracking and timing -- follow a moving ball with your eyes and tap the instant it crosses the zone, the same skill dynamic-visual-acuity testing measures." },
   { id:"pitch-id", name:"Pitch ID", icon:"chart",
-    tagline:"Call it before it's gone.",
-    blurb:"Modeled on GameSense Pitch-IQ's video-occlusion method -- real pitch-recognition training shows a hitter roughly the first third of the pitch's flight, then cuts it. You have to identify the pitch off the release and early break, not the whole flight." },
+    tagline:"Time your swing to the pitch.",
+    blurb:"A single-pitch timing trial — modeled on the tap-to-time AR trainers real hitters use. Watch the pitch all the way to the zone, then tap SWING the instant you'd pull the trigger. Your tap gets checked against the pitch's true arrival, so you see exactly how close your timing decision really was." },
 ];
 
 function visionKey(){ return "hp_vision_" + session.username; }
@@ -3289,7 +3301,7 @@ function visionLevelConfig(moduleId, level){
     "peripheral-snap": { exposureMs:[650,520,420,340,260][L-1], reps:10 },
     "reaction-gate": { window:[900,850,800,750,700][L-1], noGoRatio:[0.2,0.25,0.3,0.35,0.4][L-1], reps:12 },
     "track-ball": { durationMs:[2200,1900,1650,1400,1150][L-1], reps:8 },
-    "pitch-id": { durationMs:[1500,1350,1200,1050,900][L-1], occludeFrac:[0.62,0.55,0.48,0.42,0.36][L-1], types:[2,3,3,4,4][L-1], reps:8 },
+    "pitch-id": { durationMs:[1500,1350,1200,1050,900][L-1], hitWindowMs:[180,155,130,105,85][L-1], types:[2,3,3,4,4][L-1], reps:8 },
   };
   return cfgs[moduleId];
 }
@@ -3430,31 +3442,67 @@ function vResolveTrack(tapTime){
    taught to look for, changeup spins like a fastball but visibly slower
    (it's a timing pitch, not a movement pitch -- matches the speedMul below). */
 const PITCH_TYPES = [
-  { id:"FB", label:"Fastball", top:50, ease:"linear", speedMul:1 },
-  { id:"CH", label:"Changeup", top:50, ease:"linear", speedMul:1.18 },
-  { id:"SL", label:"Slider", top:62, ease:"ease-in", speedMul:1 },
-  { id:"CB", label:"Curveball", top:78, ease:"ease-in", speedMul:1 },
+  { id:"FB", label:"Fastball", top:50, ease:"linear", speedMul:1, mph:92 },
+  { id:"CH", label:"Changeup", top:50, ease:"linear", speedMul:1.18, mph:78 },
+  { id:"SL", label:"Slider", top:62, ease:"ease-in", speedMul:1, mph:85 },
+  { id:"CB", label:"Curveball", top:78, ease:"ease-in", speedMul:1, mph:74 },
 ];
 const BASEBALL_SVG = `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#f4f2ee" stroke="#a8a8a8" stroke-width="0.75"/><path d="M8,5 Q22,20 8,35" fill="none" stroke="#c0392b" stroke-width="2"/><path d="M32,5 Q18,20 32,35" fill="none" stroke="#c0392b" stroke-width="2"/></svg>`;
+/* v40: Josh -- "id like to model pitch id game after the timing back in the
+   screen recording" (b4-app.com's AR pitch trainer: watch the pitch, tap once
+   to time your swing, see a Timing Gap / Hit-or-Miss / your-timing-vs-optimal
+   results screen). Replaces the old occlude-then-guess-the-pitch-type quiz --
+   the ball now plays its full flight and the only input is a single SWING tap. */
 function vStartPitchId(){
   const pool = PITCH_TYPES.slice(0, vLive.cfg.types);
   const pitch = pool[Math.floor(Math.random()*pool.length)];
   const dur = Math.round(vLive.cfg.durationMs * pitch.speedMul);
   const dotHtml = pitch.id === "SL" ? `<div class="pitch-reddot"></div>` : "";
   vStage().innerHTML = `<div class="vstage-baseball spin-${pitch.id}" id="vball" style="top:50%;">${BASEBALL_SVG}${dotHtml}</div>`;
+  document.getElementById('vsub').innerHTML = `<button class="big-tap-zone" onclick="vTapPitchTiming()">Swing</button>`;
   const ball = document.getElementById('vball');
   ball.style.transition = `left ${dur}ms ${pitch.ease}, top ${dur}ms ${pitch.ease}`;
   requestAnimationFrame(()=>{ ball.style.left="90%"; ball.style.top = pitch.top+"%"; });
-  const occludeMs = Math.round(dur * vLive.cfg.occludeFrac);
+  vLive.curPitch = pitch;
+  vLive.curDur = dur;
+  vLive.pitchStartAt = Date.now();
   vLive.awaiting = true;
-  vLive.timer = setTimeout(()=>{
-    if(!vLive) return;
-    const b = document.getElementById('vball'); if(b) b.style.opacity = "0";
-    document.getElementById('vsub').innerHTML = `<div class="answer-grid">${pool.map(p=>`<button class="answer-btn" data-val="${p.label}" onclick="vAnswerMC('${p.label}','${pitch.label}')">${p.label}</button>`).join("")}</div>`;
-  }, occludeMs);
+  vLive.timer = setTimeout(()=>{ if(vLive && vLive.awaiting) vResolvePitchTiming(null); }, dur + 700);
+}
+function vTapPitchTiming(){
+  if(!vLive || !vLive.awaiting) return;
+  vResolvePitchTiming(Date.now());
+}
+function vResolvePitchTiming(tapTime){
+  if(!vLive || !vLive.awaiting) return;
+  vLive.awaiting = false;
+  clearTimeout(vLive.timer);
+  const pitch = vLive.curPitch, dur = vLive.curDur;
+  const yours = tapTime ? (tapTime - vLive.pitchStartAt) : null;
+  const gap = yours===null ? null : Math.abs(yours - dur);
+  const correct = gap !== null && gap <= vLive.cfg.hitWindowMs;
+  if(correct) vLive.correct++;
+  vLive.repIdx++;
+  const b = document.getElementById('vball'); if(b) b.style.opacity = "0";
+  const sub = document.getElementById('vsub');
+  if(sub) sub.innerHTML = `<div class="pitch-timing-result">
+    <div class="ptr-label">Timing Gap</div>
+    <div class="ptr-gap">${gap===null?'--':gap}<span>ms</span></div>
+    <div class="ptr-pill ${correct?'hit':'miss'}">${gap===null?'Missed':(correct?'Hit':'Miss')}</div>
+    <div class="ptr-line">Your timing is <b>${yours===null?'--':yours+' ms'}</b></div>
+    <div class="ptr-pitch">${pitch.label} <b>${pitch.mph} mph</b></div>
+    <div class="ptr-optimal">Optimal timing <b>${dur} ms</b></div>
+    <button class="btn btn-primary" style="width:auto;padding:10px 24px;margin-top:14px;" onclick="vContinuePitchId()">Continue</button>
+  </div>`;
+  vUpdateHud();
+}
+function vContinuePitchId(){
+  if(!vLive) return;
+  if(vLive.repIdx >= vLive.cfg.reps) vFinishSession();
+  else vStartRep();
 }
 
-/* -- shared multiple-choice resolver (flash-recall, peripheral, pitch-id) -- */
+/* -- shared multiple-choice resolver (flash-recall, peripheral) -- */
 function vAnswerMC(choice, answer){
   if(!vLive || !vLive.awaiting) return;
   vLive.awaiting = false;
