@@ -543,12 +543,12 @@ const WARMUP = {
 const TEE = {
   intro: "Every day we hit, this rotation is the station work — six drills, run in order, each isolating one piece of the swing before it all comes together.",
   stations: [
-    { name:"1. Open Stance — Isolate the Hands", intent:"Isolate the hands and feel the path to the baseball.", cues:["Stance: open to match the third-base line angle off home plate","Tee position: between the feet","Hands only — no lower half"], video:"https://drive.google.com/file/d/1ZpK3UfjyYLActTDl5laVqvQaUH5COLOU/preview" },
-    { name:"2. Closed Stance — Full Swing Out Front", intent:"Feel hitting the ball out front.", cues:["Stance: closed to match the first-base line angle off home plate","Tee position: out front of the lead foot, in line with the toes","Full swing"], video:"https://drive.google.com/file/d/1KapDBve_dNP6mq3TUJOTbRZnSzPybmLi/preview" },
-    { name:"3. Rhythm Stance to Power Position — Back Hip Drive", intent:"Get to a 50/50 power position and check it before swinging.", cues:["Rhythm stance into power position, pause 3 seconds, check three things: feet in line, barrel over the button of the hat, hands held back as far as possible","After the check, swing — knee drives down and toward the front foot, back hip drives to the baseball"], video:"https://drive.google.com/file/d/1fqWnKvwieFNs-vPGPxsCViWHYqbHX4gX/preview" },
-    { name:"4. Beltre Drill — Lower Half Drive", intent:"Emphasize lower half drive to the baseball.", cues:[], video:"https://drive.google.com/file/d/1H-oQSTe0yU3WLT5GTawfLa6vwh6mb-wH/preview" },
-    { name:"5. Hop Back Drill — Lower Half Drive", intent:"Emphasize lower half drive to the baseball.", cues:[], video:"https://drive.google.com/file/d/1VjbXeSE-Z9kaoEjEr5PWPrAlV-win5FT/preview" },
-    { name:"6. Around the World — Bat Control", intent:"Work bat control across the whole field.", cues:["2x hard ground balls through the 4-hole","2x line drive to the right-center gap","2x line drive to the left-center gap","2x double down the line","Note: tee position is critical for each target — move it deliberately for every rep"], video:"https://drive.google.com/file/d/1_3ONbr2FanGNeTGhn10WaSxYoG1ub9jB/preview" },
+    { name:"1. Open Stance — Isolate the Hands", intent:"Isolate the hands and feel the path to the baseball.", cues:["Stance: open to match the third-base line angle off home plate","Tee position: between the feet","Hands only — no lower half"], video:"https://youtube.com/shorts/47OqjC-6r3U" },
+    { name:"2. Closed Stance — Full Swing Out Front", intent:"Feel hitting the ball out front.", cues:["Stance: closed to match the first-base line angle off home plate","Tee position: out front of the lead foot, in line with the toes","Full swing"], video:"https://youtube.com/shorts/FVdRVByTTAQ" },
+    { name:"3. Rhythm Stance to Power Position — Back Hip Drive", intent:"Get to a 50/50 power position and check it before swinging.", cues:["Rhythm stance into power position, pause 3 seconds, check three things: feet in line, barrel over the button of the hat, hands held back as far as possible","After the check, swing — knee drives down and toward the front foot, back hip drives to the baseball"], video:"https://youtube.com/shorts/_FTd8njoabs" },
+    { name:"4. Beltre Drill — Lower Half Drive", intent:"Emphasize lower half drive to the baseball.", cues:[], video:"https://youtube.com/shorts/iwNJhHEdxLc" },
+    { name:"5. Hop Back Drill — Lower Half Drive", intent:"Emphasize lower half drive to the baseball.", cues:[], video:"https://youtube.com/shorts/5pUALOHLyqk" },
+    { name:"6. Around the World — Bat Control", intent:"Work bat control across the whole field.", cues:["2x hard ground balls through the 4-hole","2x line drive to the right-center gap","2x line drive to the left-center gap","2x double down the line","Note: tee position is critical for each target — move it deliberately for every rep"], video:"https://youtube.com/shorts/zKxx5QzUSP4" },
   ]
 };
 // Flattened one-line-per-station labels — used wherever the app just needs a
@@ -607,7 +607,21 @@ function inlineVideoBody(url){
   if(!url) return `<div class="video-empty-inline">No video added yet — this slot is ready as soon as one is uploaded.</div>`;
   if(isDirectVideoFile(url)) return `<video src="${url}" controls playsinline style="width:100%;border-radius:2px;margin-top:8px;background:#000;"></video>`;
   const ytId = youTubeEmbedId(url);
-  if(ytId) return `<div style="position:relative;width:100%;padding-top:56.25%;margin-top:8px;border-radius:2px;overflow:hidden;background:#000;"><iframe src="https://www.youtube.com/embed/${ytId}" title="Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;"></iframe></div>`;
+  if(ytId){
+    // v38: Josh -- "when using my mobile i try to watch it in app but the
+    // progress bar blocks the video" on the Drive-hosted tee videos. Root
+    // cause was Drive's own uneditable player chrome (not fixable from our
+    // CSS), so those got re-uploaded to YouTube as Unlisted, which is what
+    // every other video in the app already uses successfully. Those
+    // particular re-uploads are YouTube Shorts (vertical 9:16 footage), so
+    // forcing them into the standard 16:9 box would pillarbox them down to a
+    // thin strip -- give /shorts/ URLs a portrait frame instead, capped in
+    // width so it doesn't run edge-to-edge huge on a phone screen.
+    const isShort = /youtube\.com\/shorts\//i.test(url);
+    const pad = isShort ? "177.78%" : "56.25%";
+    const box = isShort ? "max-width:360px;margin-left:auto;margin-right:auto;" : "";
+    return `<div style="position:relative;width:100%;${box}padding-top:${pad};margin-top:8px;border-radius:2px;overflow:hidden;background:#000;"><iframe src="https://www.youtube.com/embed/${ytId}" title="Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;"></iframe></div>`;
+  }
   const driveId = googleDriveFileId(url);
   if(driveId) return `<div style="position:relative;width:100%;padding-top:56.25%;margin-top:8px;border-radius:2px;overflow:hidden;background:#000;"><iframe src="https://drive.google.com/file/d/${driveId}/preview" title="Video" frameborder="0" allow="autoplay" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;"></iframe></div>`;
   return `<a href="${url}" target="_blank" rel="noopener" class="video-link-inline">Watch video &#8599;</a>`;
@@ -624,13 +638,13 @@ function drillVideo(d){ return typeof d === 'string' ? null : (d.video || null);
 // Hitting Workout — build-your-own-session drill pool, 6 categories (v2)
 const HITTING_DRILL_CATEGORIES = [
   { id:"tee", name:"Tee Work", desc:"Groove the swing pattern in a controlled environment.", drills:[
-    { name:"Open Stance — Isolate the Hands", video:"https://drive.google.com/file/d/1ZpK3UfjyYLActTDl5laVqvQaUH5COLOU/preview" },
-    { name:"Closed Stance — Full Swing Out Front", video:"https://drive.google.com/file/d/1KapDBve_dNP6mq3TUJOTbRZnSzPybmLi/preview" },
-    { name:"Rhythm Stance to Power Position — Back Hip Drive", video:"https://drive.google.com/file/d/1fqWnKvwieFNs-vPGPxsCViWHYqbHX4gX/preview" },
-    { name:"Beltre Drill — Lower Half Drive", video:"https://drive.google.com/file/d/1H-oQSTe0yU3WLT5GTawfLa6vwh6mb-wH/preview" },
-    { name:"Hop Back Drill — Lower Half Drive", video:"https://drive.google.com/file/d/1VjbXeSE-Z9kaoEjEr5PWPrAlV-win5FT/preview" },
-    { name:"Around the World — Bat Control", video:"https://drive.google.com/file/d/1_3ONbr2FanGNeTGhn10WaSxYoG1ub9jB/preview" },
-    { name:"Sosa Progression", video:"https://drive.google.com/file/d/1mxyhTP-kvvLild9a9da9KKY14fIomFEZ/preview" },
+    { name:"Open Stance — Isolate the Hands", video:"https://youtube.com/shorts/47OqjC-6r3U" },
+    { name:"Closed Stance — Full Swing Out Front", video:"https://youtube.com/shorts/FVdRVByTTAQ" },
+    { name:"Rhythm Stance to Power Position — Back Hip Drive", video:"https://youtube.com/shorts/_FTd8njoabs" },
+    { name:"Beltre Drill — Lower Half Drive", video:"https://youtube.com/shorts/iwNJhHEdxLc" },
+    { name:"Hop Back Drill — Lower Half Drive", video:"https://youtube.com/shorts/5pUALOHLyqk" },
+    { name:"Around the World — Bat Control", video:"https://youtube.com/shorts/zKxx5QzUSP4" },
+    { name:"Sosa Progression", video:"https://youtube.com/shorts/2MWPT7CnKVQ" },
     "Dry load reps (no ball) — 3x10",
     "Stride-and-hold — 3x8",
     "Inside tee, pull gap — 3x10",
