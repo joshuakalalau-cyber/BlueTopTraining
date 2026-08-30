@@ -508,6 +508,7 @@ const ICONS = {
   history:'<path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 16 14"/>',
   monitor:'<rect x="2" y="4" width="20" height="14" rx="2"/><polygon points="10 9 15 12 10 15 10 9"/>',
   eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  chevrondown:'<polyline points="6 9 12 15 18 9"/>',
 };
 function icon(name){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg>'; }
 
@@ -597,6 +598,17 @@ let openInlineVideo = {};
 function toggleInlineVideo(key, catId, returnView, returnParam){
   openInlineVideo[key] = !openInlineVideo[key];
   go(returnView || 'category', returnView ? returnParam : catId);
+}
+// v41: Josh -- "the warm up and tee progressions can be condensed because
+// they are tasks that will happen everyday that it will eventually become
+// memory... i want the main focus of the daily hitting plan to be the actual
+// hitting drills and plan the hitter wants." Warm-Up/Tee/Cool-Down on Daily
+// Hitting Plan now collapse to a single row apiece (tap to expand into the
+// same video/detail list as before) so Your Drills gets the visual weight.
+let openDailyPlanSection = {};
+function toggleDailyPlanSection(key){
+  openDailyPlanSection[key] = !openDailyPlanSection[key];
+  go('daily-plan');
 }
 function isDirectVideoFile(url){ return /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url); }
 // v17: short YouTube clips for Warm-Up/Cool-Down (request: "make a button to
@@ -2777,8 +2789,11 @@ function renderDailyPlan(){
     if(catName.startsWith("Cool-Down")) return "COOL-DOWN";
     return "WARM-UP";
   }
-  function videoBlock(title, catsWithIdx){
-    let h = `<div class="section-label">${title}</div><div class="item-block"><div style="padding-top:6px;">`;
+  // v41: these two used to render as their own full section-label + item-block
+  // (see collapseSection below for why that changed) — now they just produce
+  // the inner rows, nested inside whichever collapsed section calls them.
+  function videoRows(catsWithIdx){
+    let h = `<div style="padding-top:6px;">`;
     catsWithIdx.forEach(([c, ci]) => {
       const tag = warmupCatTag(c.name);
       c.items.forEach((item, ii) => {
@@ -2796,7 +2811,7 @@ function renderDailyPlan(){
         if(videoOpen) h += `<div class="ex-panel">${inlineVideoBody(item.video)}</div>`;
       });
     });
-    h += `<div style="height:4px;"></div></div></div>`;
+    h += `<div style="height:4px;"></div></div>`;
     return h;
   }
   // Tee Progressions used to render as flattened plain-text lines
@@ -2804,8 +2819,8 @@ function renderDailyPlan(){
   // already carries. Switched to the same card treatment as everything else so
   // those videos (once filmed) show up here too, not just on the Training
   // Library's Tee Progressions page.
-  function teeBlock(){
-    let h = `<div class="section-label">Tee Progressions</div><div class="item-block"><div style="padding-top:6px;">`;
+  function teeRows(){
+    let h = `<div style="padding-top:6px;">`;
     TEE.stations.forEach((s, si) => {
       const key = "tee-"+si;
       const videoOpen = !!openInlineVideo[key];
@@ -2820,15 +2835,38 @@ function renderDailyPlan(){
       </div>`;
       if(videoOpen) h += `<div class="ex-panel">${inlineVideoBody(s.video)}</div>`;
     });
-    h += `<div style="height:4px;"></div></div></div>`;
+    h += `<div style="height:4px;"></div></div>`;
+    return h;
+  }
+  // v41: Warm-Up/Tee/Cool-Down collapse to one tappable row apiece — same
+  // rows as before live inside, just hidden until asked for.
+  function collapseSection(key, label, innerHtml){
+    const open = !!openDailyPlanSection[key];
+    let h = `<div class="item-block" style="margin-bottom:14px;">`;
+    h += `<div onclick="toggleDailyPlanSection('${key}')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;">
+      <span style="font-size:13.5px;font-weight:600;color:var(--text);">${label}</span>
+      <span style="color:var(--text-mute);display:flex;transform:rotate(${open?180:0}deg);">${icon('chevrondown')}</span>
+    </div>`;
+    if(open) h += `<div style="border-top:1px solid var(--border);">${innerHtml}</div>`;
+    h += `</div>`;
     return h;
   }
 
   const warmupCats = WARMUP.categories.map((c,ci) => [c,ci]).filter(([c]) => !c.name.startsWith("Cool-Down"));
   const cooldownCats = WARMUP.categories.map((c,ci) => [c,ci]).filter(([c]) => c.name.startsWith("Cool-Down"));
 
-  html += videoBlock("Warm-Up", warmupCats);
-  html += teeBlock();
+  html += collapseSection('warmup', 'Warm-Up', videoRows(warmupCats));
+  html += collapseSection('tee', 'Tee Progressions', teeRows());
+
+  html += `<div class="section-label">Your Drills</div>`;
+  if(picks.length === 0){
+    html += `<div class="card"><div class="phil-text" style="font-size:12.5px;color:var(--text-dim);">No drills picked yet — head to <a href="#" onclick="go('drills-library');return false;" style="color:var(--accent);">Hitting Drills</a> and tap "+ Add to Daily Plan" on anything you want to work on today.</div></div>`;
+  } else {
+    html += `<div class="item-block"><div style="padding-top:6px;">` + picks.map((it, i) => {
+      return `<div class="simple-check-row"><span><div class="label">${it.drill}</div><div class="desc">${it.catName}</div></span><button onclick="removeDailyPick(${i})" style="background:none;border:none;color:var(--text-mute);font-size:16px;">&times;</button></div>`;
+    }).join("") + `</div></div>`;
+    html += `<div style="margin:6px 0 16px;"><a href="#" onclick="go('drills-library');return false;" style="color:var(--accent);font-size:12px;">+ Browse more drills</a></div>`;
+  }
 
   if(bat.started && bat.week <= WEIGHTED_BAT.weeks.length){
     const batDays = batDaysForWeek(bat.week);
@@ -2863,17 +2901,7 @@ function renderDailyPlan(){
     html += `<div class="section-label">Weighted Bat Program</div><div class="card"><div class="phil-text" style="font-size:12.5px;color:var(--text-dim);">Not started yet — <a href="#" onclick="go('bat-program');return false;" style="color:var(--accent);">start the program</a> to have it added here automatically.</div></div>`;
   }
 
-  html += `<div class="section-label">Your Drills</div>`;
-  if(picks.length === 0){
-    html += `<div class="card"><div class="phil-text" style="font-size:12.5px;color:var(--text-dim);">No drills picked yet — head to <a href="#" onclick="go('drills-library');return false;" style="color:var(--accent);">Hitting Drills</a> and tap "+ Add to Daily Plan" on anything you want to work on today.</div></div>`;
-  } else {
-    html += `<div class="item-block"><div style="padding-top:6px;">` + picks.map((it, i) => {
-      return `<div class="simple-check-row"><span><div class="label">${it.drill}</div><div class="desc">${it.catName}</div></span><button onclick="removeDailyPick(${i})" style="background:none;border:none;color:var(--text-mute);font-size:16px;">&times;</button></div>`;
-    }).join("") + `</div></div>`;
-    html += `<div style="margin:6px 0 16px;"><a href="#" onclick="go('drills-library');return false;" style="color:var(--accent);font-size:12px;">+ Browse more drills</a></div>`;
-  }
-
-  html += videoBlock("Cool-Down", cooldownCats);
+  html += collapseSection('cooldown', 'Cool-Down', videoRows(cooldownCats));
 
   // v5: Hitting Sessions Logged tracker — real history from completeHittingSession()
   html += `<div class="section-label">Hitting Sessions Logged</div>`;
