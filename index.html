@@ -380,19 +380,13 @@ input,select{font-family:inherit;}
 .vstage-reaction-dot.nogo{background:var(--red);}
 .vstage-ball{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--accent);top:50%;left:4%;transform:translateY(-50%);}
 .vstage-zone{position:absolute;top:0;bottom:0;width:14%;right:8%;background:rgba(46,216,229,0.1);border-left:2px dashed var(--accent);border-right:2px dashed var(--accent);}
-/* v34: real-seam baseball for Pitch ID (Josh: "a real baseball to view seams") --
-   spin style/speed per pitch type mirrors the actual spin cues hitters are
-   taught to read: fastball backspin, curveball's slow 12-6 tumble, slider's
-   fast spin + visible "red dot", changeup sharing the fastball look but slower. */
-.vstage-baseball{position:absolute;width:26px;height:26px;top:50%;left:4%;transform:translateY(-50%);}
-.vstage-baseball svg{width:100%;height:100%;display:block;}
-.vstage-baseball.spin-FB svg,.vstage-baseball.spin-CH svg{animation:seam-spin-fb 0.35s linear infinite;}
-.vstage-baseball.spin-CB svg{animation:seam-spin-cb 0.7s linear infinite;}
-.vstage-baseball.spin-SL svg{animation:seam-spin-sl 0.22s linear infinite;}
-.pitch-reddot{position:absolute;width:5px;height:5px;border-radius:50%;background:#e01e1e;top:7px;left:7px;box-shadow:0 0 2px rgba(0,0,0,0.6);}
-@keyframes seam-spin-fb{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-@keyframes seam-spin-cb{from{transform:rotateX(0deg);}to{transform:rotateX(360deg);}}
-@keyframes seam-spin-sl{from{transform:rotate(0deg);}to{transform:rotate(-360deg);}}
+/* v42: Josh -- "get rid of Pitch ID... replace it with a light tree, like
+   drag racers use." Pro tree: 3 ambers light together, green fires after a
+   random hold, tap it -- leave early and it's a red-light foul. */
+.light-tree{display:flex;justify-content:center;gap:14px;padding:22px 0;}
+.lt-bulb{width:38px;height:38px;border-radius:50%;background:var(--panel2);border:1px solid var(--border);}
+.lt-bulb.amber.lit{background:#FFC107;box-shadow:0 0 14px rgba(255,193,7,0.6);}
+.lt-bulb.green.lit{background:var(--green);box-shadow:0 0 14px rgba(47,191,113,0.6);}
 .vstage-result-flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:0.05em;background:rgba(10,10,13,0.55);}
 .vstage-result-flash.good{color:var(--green);}
 .vstage-result-flash.bad{color:var(--red);}
@@ -403,15 +397,15 @@ input,select{font-family:inherit;}
    ID's new SWING button (v40) reuses the same class, so it gets styled now. */
 .big-tap-zone{width:100%;padding:22px;border-radius:2px;background:var(--accent-fill);color:#fff;border:none;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(0,0,0,0.4);}
 .big-tap-zone:hover,.big-tap-zone:active{background:var(--accent-fill-hover);}
-.pitch-timing-result{text-align:center;padding:18px 16px;background:var(--panel);border:1px solid var(--border);border-radius:2px;}
-.ptr-label{font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-mute);}
-.ptr-gap{font-size:36px;font-weight:900;color:var(--text);margin:4px 0 12px;}
-.ptr-gap span{font-size:15px;font-weight:700;color:var(--text-dim);margin-left:4px;}
-.ptr-pill{display:inline-block;padding:6px 18px;border-radius:2px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;font-size:13px;margin-bottom:12px;}
-.ptr-pill.hit{background:rgba(47,191,113,0.14);color:var(--green);}
-.ptr-pill.miss{background:rgba(239,68,68,0.14);color:var(--red);}
-.ptr-line,.ptr-pitch,.ptr-optimal{font-size:13px;color:var(--text-dim);margin-top:6px;}
-.ptr-line b,.ptr-pitch b,.ptr-optimal b{color:var(--text);}
+.rxn-result{text-align:center;padding:18px 16px;background:var(--panel);border:1px solid var(--border);border-radius:2px;}
+.rxn-label{font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-mute);}
+.rxn-gap{font-size:36px;font-weight:900;color:var(--text);margin:4px 0 12px;}
+.rxn-gap span{font-size:15px;font-weight:700;color:var(--text-dim);margin-left:4px;}
+.rxn-pill{display:inline-block;padding:6px 18px;border-radius:2px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;font-size:13px;margin-bottom:12px;}
+.rxn-pill.hit{background:rgba(47,191,113,0.14);color:var(--green);}
+.rxn-pill.miss{background:rgba(239,68,68,0.14);color:var(--red);}
+.rxn-line,.rxn-target{font-size:13px;color:var(--text-dim);margin-top:6px;}
+.rxn-line b,.rxn-target b{color:var(--text);}
 .answer-btn:hover{border-color:var(--accent);}
 .answer-btn.correct{border-color:var(--green);color:var(--green);background:rgba(47,191,113,0.1);}
 .answer-btn.wrong{border-color:var(--red);color:var(--red);background:rgba(239,68,68,0.1);}
@@ -510,6 +504,7 @@ const ICONS = {
   monitor:'<rect x="2" y="4" width="20" height="14" rx="2"/><polygon points="10 9 15 12 10 15 10 9"/>',
   eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
   chevrondown:'<polyline points="6 9 12 15 18 9"/>',
+  bolt:'<path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/>',
 };
 function icon(name){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg>'; }
 
@@ -3208,25 +3203,56 @@ function renderProfile(){
 const VISION_MODULES = [
   { id:"flash-recall", name:"Flash Recall", icon:"eye",
     tagline:"See it for a blink, remember what you saw.",
-    blurb:"Modeled on tachistoscopic training -- the flash-recognition drill sports vision labs have used with hitters for decades (a positive correlation shows up between tachistoscope scores and batting average). A short string of digits flashes on screen; recall it before it fades." },
+    blurb:"Modeled on tachistoscopic training — the flash-recognition drill sports vision labs have used with hitters for decades (a positive correlation shows up between tachistoscope scores and batting average). A short string of digits flashes on screen; recall it before it fades." },
   { id:"peripheral-snap", name:"Peripheral Snap", icon:"target",
     tagline:"Keep your eyes on center. Catch what happens at the edge.",
-    blurb:"Trains peripheral awareness the way strobe-based programs do -- hold focus on the middle of the screen while a target flashes off to one side, and call which side without ever looking away from center." },
+    blurb:"Trains peripheral awareness the way strobe-based programs do — hold focus on the middle of the screen while a target flashes off to one side, and call which side without ever looking away from center." },
   { id:"reaction-gate", name:"Reaction Gate", icon:"flame",
     tagline:"Go on green. Hold on red.",
-    blurb:"A go/no-go reaction drill -- the inhibitory-control concept behind stroboscopic (Senaptec Strobe-style) training, where the brain has to process a stimulus fast enough to react correctly instead of just quickly." },
+    blurb:"A go/no-go reaction drill — the inhibitory-control concept behind stroboscopic (Senaptec Strobe-style) training, where the brain has to process a stimulus fast enough to react correctly instead of just quickly." },
   { id:"track-ball", name:"Track the Ball", icon:"play",
     tagline:"Follow it all the way into the zone.",
-    blurb:"Dynamic visual tracking and timing -- follow a moving ball with your eyes and tap the instant it crosses the zone, the same skill dynamic-visual-acuity testing measures." },
-  { id:"pitch-id", name:"Pitch ID", icon:"chart",
-    tagline:"Time your swing to the pitch.",
-    blurb:"A single-pitch timing trial — modeled on the tap-to-time AR trainers real hitters use. Watch the pitch all the way to the zone, then tap SWING the instant you'd pull the trigger. Your tap gets checked against the pitch's true arrival, so you see exactly how close your timing decision really was." },
+    blurb:"Dynamic visual tracking and timing — follow a moving ball with your eyes and tap the instant it crosses the zone, the same skill dynamic-visual-acuity testing measures." },
+  { id:"light-tree", name:"Light Tree", icon:"bolt",
+    tagline:"Green means go. Red means you jumped it.",
+    blurb:"A drag-strip pro tree — all three ambers flash together, then green fires after a random hold so you can't just count a beat. Tap the instant it goes. Leave early and it's a red-light foul, same as a real strip. NHRA pros run 0.010-0.100s off a pro tree; MLB's toughest tier here sits right at the ~150ms floor of trained-athlete visual reaction time." },
 ];
+
+// v42: Josh -- "instead of levels maybe we make divisions... the highest
+// level in that folder is the peak reaction time needed, then high school,
+// college and MLB." Replaces flat Level 1-5 with 4 divisions x 3 tiers (12
+// steps total) across all 5 games. Reaction-time-based tiers (Reaction Gate,
+// Light Tree) are grounded in real numbers: general human visual reaction
+// time runs ~200-250ms, trained athletes ~150-210ms, and baseball pitch-
+// recognition windows shrink from ~500ms at youth mound distances (40-54ft)
+// down to ~400ms for MLB-velocity fastballs (60.5ft, 90-100mph) -- source
+// eFastball's reaction-time-by-age-and-distance tables. MLB's hardest tier
+// sits at the trained-pro floor (150ms), so the jump to the top is real.
+const VISION_DIVISIONS = [
+  { id:"youth", name:"Youth", short:"Youth", tagline:"11U-14U — 40-54ft mound" },
+  { id:"hs", name:"High School", short:"HS", tagline:"60.5ft mound, ~75-80 mph" },
+  { id:"college", name:"College", short:"College", tagline:"60.5ft mound, ~85-88 mph" },
+  { id:"mlb", name:"MLB", short:"MLB", tagline:"60.5ft mound, 90-100 mph" },
+];
+function visionG(div, tier){ return div*3 + tier; }
+function visionDivTier(G){ return { divIdx: Math.floor(G/3), tierIdx: G%3 }; }
 
 function visionKey(){ return "hp_vision_" + session.username; }
 function loadVisionProgress(){
   const p = JSON.parse(localStorage.getItem(visionKey()) || "{}");
-  VISION_MODULES.forEach(m => { if(!p[m.id]) p[m.id] = { level:1, bestScore:0, sessions:0 }; });
+  VISION_MODULES.forEach(m => {
+    if(!p[m.id]){ p[m.id] = { div:0, tier:0, bestScore:0, sessions:0 }; }
+    else if(p[m.id].div === undefined){
+      // migrate legacy flat Level 1-5 -> Division/Tier so existing testers
+      // keep their earned progress instead of resetting to the bottom.
+      const oldLevel = p[m.id].level || 1;
+      const G = Math.min(11, Math.max(0, Math.round((oldLevel-1)/4*11)));
+      const { divIdx, tierIdx } = visionDivTier(G);
+      p[m.id].div = divIdx;
+      p[m.id].tier = tierIdx;
+      delete p[m.id].level;
+    }
+  });
   return p;
 }
 function saveVisionProgress(p){ localStorage.setItem(visionKey(), JSON.stringify(p)); }
@@ -3259,7 +3285,7 @@ function renderGamesHub(){
     <div class="game-card" onclick="go('vision-lab')">
       <div class="game-card-icon">${icon('eye')}</div>
       <div class="game-card-title">Vision Lab</div>
-      <div class="game-card-sub">5 short modules -- flash recall, peripheral awareness, reaction speed, ball tracking, pitch ID.</div>
+      <div class="game-card-sub">5 short modules — flash recall, peripheral awareness, reaction speed, ball tracking, light tree.</div>
       <div class="game-card-foot"><span class="rank-pill">${gamesRank(visionXp)}</span><span class="xp-note">${visionXp} XP</span></div>
     </div>
     <div class="game-card" onclick="go('game-iq')">
@@ -3280,13 +3306,14 @@ function visionModule(id){ return VISION_MODULES.find(m=>m.id===id); }
 
 function renderVisionLab(){
   const vp = loadVisionProgress();
-  let html = `<div class="page-head"><div class="crumbs"><a href="#" onclick="go('games');return false;" style="color:var(--accent);">Games</a></div><h1>Vision Lab</h1><div class="sub">5 short modules modeled on real sports-vision training drills. Each one tracks its own level and best score.</div></div>`;
+  let html = `<div class="page-head"><div class="crumbs"><a href="#" onclick="go('games');return false;" style="color:var(--accent);">Games</a></div><h1>Vision Lab</h1><div class="sub">5 short modules modeled on real sports-vision training drills. Each one tracks its own division and best score.</div></div>`;
   html += `<div class="module-grid">` + VISION_MODULES.map(m=>{
     const p = vp[m.id];
+    const dv = VISION_DIVISIONS[p.div];
     return `<div class="module-card" onclick="go('vision-module','${m.id}')">
       <div class="module-card-head"><div class="icn">${icon(m.icon)}</div><div class="module-card-name">${m.name}</div></div>
       <div class="module-card-tag">${m.tagline}</div>
-      <div class="module-card-foot"><span>Level ${p.level}</span><span>Best ${p.bestScore}%</span></div>
+      <div class="module-card-foot"><span>${dv.short} · T${p.tier+1}</span><span>Best ${p.bestScore}%</span></div>
     </div>`;
   }).join("") + `</div>`;
   return html;
@@ -3307,12 +3334,14 @@ function vShowIntro(id){
   const m = visionModule(id);
   const vp = loadVisionProgress();
   const p = vp[id];
+  const dv = VISION_DIVISIONS[p.div];
   const root = vRoot(); if(!root) return;
   root.innerHTML = `
     <div class="vstage-wrap">
       <div class="vstage-msg">${m.blurb}</div>
       <div class="giq-stat-row" style="margin-top:16px;">
-        <div class="giq-stat"><div class="n">${p.level}</div><div class="l">Level</div></div>
+        <div class="giq-stat"><div class="n">${dv.short}</div><div class="l">Division</div></div>
+        <div class="giq-stat"><div class="n">${p.tier+1}/3</div><div class="l">Tier</div></div>
         <div class="giq-stat"><div class="n">${p.bestScore}%</div><div class="l">Best score</div></div>
         <div class="giq-stat"><div class="n">${p.sessions}</div><div class="l">Sessions</div></div>
       </div>
@@ -3320,28 +3349,33 @@ function vShowIntro(id){
     </div>`;
 }
 
-// v33: level 1-5 tuning per module. Exposure/duration times shorten and
-// distractor counts grow as level rises -- same "start easy, tighten the
-// window" progression the Senaptec Strobe's 8 strobe-rate settings use.
-function visionLevelConfig(moduleId, level){
-  const L = Math.max(1, Math.min(5, level));
+// v42: 4 divisions x 3 tiers = 12 steps (G 0-11), replacing the old flat
+// Level 1-5. Exposure/duration/window times shorten and distractor counts
+// grow as G rises within each module, same "start easy, tighten the window"
+// progression the old 5-level system used -- just with 4x the runway and a
+// real division boundary at Youth/HS/College/MLB. See the VISION_DIVISIONS
+// comment above for the reaction-time research behind the numbers.
+function visionLevelConfig(moduleId, G){
+  const g = Math.max(0, Math.min(11, G));
   const cfgs = {
-    "flash-recall": { digits:[2,2,3,3,4][L-1], exposureMs:[900,700,550,420,320][L-1], reps:8 },
-    "peripheral-snap": { exposureMs:[650,520,420,340,260][L-1], reps:10 },
-    "reaction-gate": { window:[900,850,800,750,700][L-1], noGoRatio:[0.2,0.25,0.3,0.35,0.4][L-1], reps:12 },
-    "track-ball": { durationMs:[2200,1900,1650,1400,1150][L-1], reps:8 },
-    "pitch-id": { durationMs:[1500,1350,1200,1050,900][L-1], hitWindowMs:[180,155,130,105,85][L-1], types:[2,3,3,4,4][L-1], reps:8 },
+    "flash-recall": { digits:[2,2,2,3,3,3,3,4,4,4,5,5][g], exposureMs:[900,750,650,550,480,420,380,340,300,260,220,180][g], reps:8 },
+    "peripheral-snap": { exposureMs:[650,580,520,460,420,380,340,310,280,250,220,190][g], reps:10 },
+    "reaction-gate": { window:[900,820,760,700,640,580,520,460,400,350,290,230][g], noGoRatio:[0.2,0.22,0.25,0.28,0.3,0.32,0.34,0.36,0.38,0.4,0.42,0.45][g], reps:12 },
+    "track-ball": { durationMs:[2200,2000,1850,1650,1500,1350,1200,1050,900,750,600,450][g], reps:8 },
+    "light-tree": { reactionMs:[650,580,520,500,470,440,410,380,350,300,220,150][g], reps:8 },
   };
   return cfgs[moduleId];
 }
 
 function startVisionSession(id){
   const vp = loadVisionProgress();
-  const level = vp[id].level;
-  vLive = { id, level, cfg: visionLevelConfig(id, level), repIdx:0, correct:0, awaiting:false, timer:null };
+  const { div, tier } = vp[id];
+  const G = visionG(div, tier);
+  vLive = { id, div, tier, cfg: visionLevelConfig(id, G), repIdx:0, correct:0, awaiting:false, timer:null };
   const root = vRoot(); if(!root) return;
+  const dv = VISION_DIVISIONS[div];
   root.innerHTML = `
-    <div class="vstage-hud"><span>Level <b>${level}</b></span><span id="vhud-rep">Rep <b>1</b> / ${vLive.cfg.reps}</span><span id="vhud-score">Correct <b>0</b></span></div>
+    <div class="vstage-hud"><span>${dv.short} <b>T${tier+1}</b></span><span id="vhud-rep">Rep <b>1</b> / ${vLive.cfg.reps}</span><span id="vhud-score">Correct <b>0</b></span></div>
     <div class="vstage-wrap"><div class="vstage" id="vstage"></div><div id="vsub"></div></div>`;
   vStartRep();
 }
@@ -3362,7 +3396,7 @@ function vStartRep(){
   else if(vLive.id === "peripheral-snap") vStartPeripheral();
   else if(vLive.id === "reaction-gate") vStartReaction();
   else if(vLive.id === "track-ball") vStartTrackBall();
-  else if(vLive.id === "pitch-id") vStartPitchId();
+  else if(vLive.id === "light-tree") vStartLightTree();
 }
 
 /* -- Flash Recall: tachistoscopic flash + recall from 4 choices -- */
@@ -3459,73 +3493,60 @@ function vResolveTrack(tapTime){
   vEndRep(correct, label);
 }
 
-/* -- Pitch ID: occluded trajectory + call the pitch --
-   v34: Josh asked for a real baseball with visible seams instead of a plain
-   dot. Licensed pitcher footage isn't something we can embed (same "nothing
-   external, nothing licensed" constraint the whole app runs on), but the
-   actual skill being trained -- reading spin off the seams in the first
-   ~15 feet -- is well documented, so the ball itself now shows real seams
-   and spins with the real signature per pitch type: fastball backspin reads
-   near straight-up "12:00" rotation, curveball is the topspin "12-6 flip"
-   (slower, tumbling), slider shows the glove-side "red dot" hitters are
-   taught to look for, changeup spins like a fastball but visibly slower
-   (it's a timing pitch, not a movement pitch -- matches the speedMul below). */
-const PITCH_TYPES = [
-  { id:"FB", label:"Fastball", top:50, ease:"linear", speedMul:1, mph:92 },
-  { id:"CH", label:"Changeup", top:50, ease:"linear", speedMul:1.18, mph:78 },
-  { id:"SL", label:"Slider", top:62, ease:"ease-in", speedMul:1, mph:85 },
-  { id:"CB", label:"Curveball", top:78, ease:"ease-in", speedMul:1, mph:74 },
-];
-const BASEBALL_SVG = `<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#f4f2ee" stroke="#a8a8a8" stroke-width="0.75"/><path d="M8,5 Q22,20 8,35" fill="none" stroke="#c0392b" stroke-width="2"/><path d="M32,5 Q18,20 32,35" fill="none" stroke="#c0392b" stroke-width="2"/></svg>`;
-/* v40: Josh -- "id like to model pitch id game after the timing back in the
-   screen recording" (b4-app.com's AR pitch trainer: watch the pitch, tap once
-   to time your swing, see a Timing Gap / Hit-or-Miss / your-timing-vs-optimal
-   results screen). Replaces the old occlude-then-guess-the-pitch-type quiz --
-   the ball now plays its full flight and the only input is a single SWING tap. */
-function vStartPitchId(){
-  const pool = PITCH_TYPES.slice(0, vLive.cfg.types);
-  const pitch = pool[Math.floor(Math.random()*pool.length)];
-  const dur = Math.round(vLive.cfg.durationMs * pitch.speedMul);
-  const dotHtml = pitch.id === "SL" ? `<div class="pitch-reddot"></div>` : "";
-  vStage().innerHTML = `<div class="vstage-baseball spin-${pitch.id}" id="vball" style="top:50%;">${BASEBALL_SVG}${dotHtml}</div>`;
-  document.getElementById('vsub').innerHTML = `<button class="big-tap-zone" onclick="vTapPitchTiming()">Swing</button>`;
-  const ball = document.getElementById('vball');
-  ball.style.transition = `left ${dur}ms ${pitch.ease}, top ${dur}ms ${pitch.ease}`;
-  requestAnimationFrame(()=>{ ball.style.left="90%"; ball.style.top = pitch.top+"%"; });
-  vLive.curPitch = pitch;
-  vLive.curDur = dur;
-  vLive.pitchStartAt = Date.now();
+/* -- Light Tree: drag-strip pro tree reaction start --
+   v42: Josh -- "get rid of Pitch ID... replace it with a light tree, like
+   drag racers use." Pro tree: all 3 amber bulbs light together, then green
+   fires after a random hold (so the hold can't be counted/memorized) --
+   tap the instant it goes. Tapping before green is a red-light foul, same
+   as a real strip. See VISION_DIVISIONS above for the reaction-time
+   research behind each tier's target. */
+function vStartLightTree(){
+  vStage().innerHTML = `<div class="light-tree">
+    <div class="lt-bulb amber" id="lt-a1"></div>
+    <div class="lt-bulb amber" id="lt-a2"></div>
+    <div class="lt-bulb amber" id="lt-a3"></div>
+    <div class="lt-bulb green" id="lt-g"></div>
+  </div>`;
+  document.getElementById('vsub').innerHTML = `<button class="big-tap-zone" onclick="vTapLightTree()">GO</button>`;
   vLive.awaiting = true;
-  vLive.timer = setTimeout(()=>{ if(vLive && vLive.awaiting) vResolvePitchTiming(null); }, dur + 700);
+  vLive.greenAt = null;
+  vLive.timer = setTimeout(()=>{
+    if(!vLive) return;
+    ['lt-a1','lt-a2','lt-a3'].forEach(elId=>{ const el = document.getElementById(elId); if(el) el.classList.add('lit'); });
+  }, 400);
+  const holdMs = 800 + Math.random()*1700;
+  vLive.timer2 = setTimeout(()=>{
+    if(!vLive) return;
+    const g = document.getElementById('lt-g'); if(g) g.classList.add('lit');
+    vLive.greenAt = Date.now();
+  }, 400 + holdMs);
 }
-function vTapPitchTiming(){
+function vTapLightTree(){
   if(!vLive || !vLive.awaiting) return;
-  vResolvePitchTiming(Date.now());
+  vResolveLightTree(Date.now());
 }
-function vResolvePitchTiming(tapTime){
+function vResolveLightTree(tapTime){
   if(!vLive || !vLive.awaiting) return;
   vLive.awaiting = false;
   clearTimeout(vLive.timer);
-  const pitch = vLive.curPitch, dur = vLive.curDur;
-  const yours = tapTime ? (tapTime - vLive.pitchStartAt) : null;
-  const gap = yours===null ? null : Math.abs(yours - dur);
-  const correct = gap !== null && gap <= vLive.cfg.hitWindowMs;
+  clearTimeout(vLive.timer2);
+  const foul = !vLive.greenAt || tapTime < vLive.greenAt;
+  const rt = foul ? null : (tapTime - vLive.greenAt);
+  const correct = !foul && rt <= vLive.cfg.reactionMs;
   if(correct) vLive.correct++;
   vLive.repIdx++;
-  const b = document.getElementById('vball'); if(b) b.style.opacity = "0";
   const sub = document.getElementById('vsub');
-  if(sub) sub.innerHTML = `<div class="pitch-timing-result">
-    <div class="ptr-label">Timing Gap</div>
-    <div class="ptr-gap">${gap===null?'--':gap}<span>ms</span></div>
-    <div class="ptr-pill ${correct?'hit':'miss'}">${gap===null?'Missed':(correct?'Hit':'Miss')}</div>
-    <div class="ptr-line">Your timing is <b>${yours===null?'--':yours+' ms'}</b></div>
-    <div class="ptr-pitch">${pitch.label} <b>${pitch.mph} mph</b></div>
-    <div class="ptr-optimal">Optimal timing <b>${dur} ms</b></div>
-    <button class="btn btn-primary" style="width:auto;padding:10px 24px;margin-top:14px;" onclick="vContinuePitchId()">Continue</button>
+  if(sub) sub.innerHTML = `<div class="rxn-result">
+    <div class="rxn-label">${foul ? 'Red Light' : 'Reaction Time'}</div>
+    <div class="rxn-gap">${foul ? 'FOUL' : rt}<span>${foul?'':'ms'}</span></div>
+    <div class="rxn-pill ${correct?'hit':'miss'}">${foul?'Foul Start':(correct?'Hit':'Miss')}</div>
+    <div class="rxn-line">${foul ? "You left before green." : `Your reaction was <b>${rt} ms</b>`}</div>
+    <div class="rxn-target">Target for this tier <b>${vLive.cfg.reactionMs} ms</b></div>
+    <button class="btn btn-primary" style="width:auto;padding:10px 24px;margin-top:14px;" onclick="vContinueLightTree()">Continue</button>
   </div>`;
   vUpdateHud();
 }
-function vContinuePitchId(){
+function vContinueLightTree(){
   if(!vLive) return;
   if(vLive.repIdx >= vLive.cfg.reps) vFinishSession();
   else vStartRep();
@@ -3559,21 +3580,32 @@ function vEndRep(correct, label){
 }
 
 function vFinishSession(){
-  const { id, level, correct, cfg } = vLive;
+  const { id, div, tier, correct, cfg } = vLive;
   const pct = Math.round(100*correct/cfg.reps);
   const vp = loadVisionProgress();
   const p = vp[id];
   p.sessions++;
   if(pct > p.bestScore) p.bestScore = pct;
-  const leveledUp = pct >= 80 && level < 5;
-  if(leveledUp) p.level = level+1;
+  const atPeak = div === VISION_DIVISIONS.length-1 && tier === 2;
+  const advanced = pct >= 80 && !atPeak;
+  let advanceMsg = "";
+  if(advanced){
+    if(tier < 2){
+      p.tier = tier+1;
+      advanceMsg = `Tier up! You're now Tier ${p.tier+1} in ${VISION_DIVISIONS[div].name}.`;
+    } else {
+      p.div = div+1;
+      p.tier = 0;
+      advanceMsg = `Division up! Welcome to ${VISION_DIVISIONS[p.div].name}.`;
+    }
+  }
   saveVisionProgress(vp);
   const m = visionModule(id);
   const root = vRoot();
   if(root) root.innerHTML = `
     <div class="vstage-wrap" style="text-align:center;">
-      <div class="module-card-name" style="font-size:20px;margin-bottom:6px;">${pct}% — ${correct}/${cfg.reps} correct</div>
-      <div class="vstage-msg">${leveledUp ? `Level up! You're now Level ${p.level} on ${m.name}.` : (pct>=80 ? "Great session." : "Keep at it — 80% clears this level.")}</div>
+      <div class="module-card-name" style="font-size:20px;margin-bottom:6px;">${pct}% \u2014 ${correct}/${cfg.reps} correct</div>
+      <div class="vstage-msg">${advanced ? advanceMsg : (atPeak && pct>=80 ? "Elite run \u2014 you're topping out MLB-level reaction time." : (pct>=80 ? "Great session." : "Keep at it \u2014 80% advances you."))}</div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
         <button class="btn btn-primary" style="width:auto;padding:10px 20px;" onclick="startVisionSession('${id}')">Play Again</button>
         <button class="btn btn-ghost" style="width:auto;padding:10px 20px;" onclick="go('vision-lab')">Back to Vision Lab</button>
