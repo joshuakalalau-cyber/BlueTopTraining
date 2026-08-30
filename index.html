@@ -419,6 +419,12 @@ input,select{font-family:inherit;}
 .giq-stat{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:12px 14px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);}
 .giq-stat .n{font-size:20px;font-weight:900;color:var(--accent);}
 .giq-stat .l{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.4px;margin-top:2px;}
+/* v43: Josh -- "i want to be able to select youth, high school, college or
+   MLB." Free division picker on the Vision Lab module intro screen. */
+.vdiv-picker{display:flex;gap:8px;flex-wrap:wrap;}
+.vdiv-btn{flex:1;min-width:70px;padding:10px 8px;background:var(--panel2);border:1px solid var(--border);border-radius:2px;color:var(--text-dim);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.3px;text-align:center;cursor:pointer;transition:border-color .15s,color .15s,background .15s;}
+.vdiv-btn:hover{border-color:var(--accent);}
+.vdiv-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
 @media (max-width:640px){
   .answer-grid{grid-template-columns:1fr;}
   .giq-stat-row{gap:10px;}
@@ -3220,37 +3226,53 @@ const VISION_MODULES = [
 
 // v42: Josh -- "instead of levels maybe we make divisions... the highest
 // level in that folder is the peak reaction time needed, then high school,
-// college and MLB." Replaces flat Level 1-5 with 4 divisions x 3 tiers (12
-// steps total) across all 5 games. Reaction-time-based tiers (Reaction Gate,
-// Light Tree) are grounded in real numbers: general human visual reaction
-// time runs ~200-250ms, trained athletes ~150-210ms, and baseball pitch-
-// recognition windows shrink from ~500ms at youth mound distances (40-54ft)
-// down to ~400ms for MLB-velocity fastballs (60.5ft, 90-100mph) -- source
-// eFastball's reaction-time-by-age-and-distance tables. MLB's hardest tier
+// college and MLB." Reaction-time-based levels (Reaction Gate, Light Tree)
+// are grounded in real numbers: general human visual reaction time runs
+// ~200-250ms, trained athletes ~150-210ms, and baseball pitch-recognition
+// windows shrink from ~500ms at youth mound distances (40-54ft) down to
+// ~400ms for MLB-velocity fastballs (60.5ft, 90-100mph) -- source
+// eFastball's reaction-time-by-age-and-distance tables. MLB's hardest level
 // sits at the trained-pro floor (150ms), so the jump to the top is real.
+// v43: Josh -- "i want to be able to select youth, high school, college or
+// MLB. and within each division i want to make it 5 levels." Divisions are
+// now freely selectable (a picker on the module intro screen) rather than
+// unlocked by advancing -- each division tracks its own 5-level ladder,
+// best score, and session count independently, so a hitter can jump
+// straight to MLB and see where they stand, or grind Youth to Level 5.
 const VISION_DIVISIONS = [
   { id:"youth", name:"Youth", short:"Youth", tagline:"11U-14U — 40-54ft mound" },
   { id:"hs", name:"High School", short:"HS", tagline:"60.5ft mound, ~75-80 mph" },
   { id:"college", name:"College", short:"College", tagline:"60.5ft mound, ~85-88 mph" },
   { id:"mlb", name:"MLB", short:"MLB", tagline:"60.5ft mound, 90-100 mph" },
 ];
-function visionG(div, tier){ return div*3 + tier; }
-function visionDivTier(G){ return { divIdx: Math.floor(G/3), tierIdx: G%3 }; }
+function visionG(div, level){ return div*5 + level; }
 
 function visionKey(){ return "hp_vision_" + session.username; }
 function loadVisionProgress(){
   const p = JSON.parse(localStorage.getItem(visionKey()) || "{}");
   VISION_MODULES.forEach(m => {
-    if(!p[m.id]){ p[m.id] = { div:0, tier:0, bestScore:0, sessions:0 }; }
-    else if(p[m.id].div === undefined){
-      // migrate legacy flat Level 1-5 -> Division/Tier so existing testers
-      // keep their earned progress instead of resetting to the bottom.
-      const oldLevel = p[m.id].level || 1;
-      const G = Math.min(11, Math.max(0, Math.round((oldLevel-1)/4*11)));
-      const { divIdx, tierIdx } = visionDivTier(G);
-      p[m.id].div = divIdx;
-      p[m.id].tier = tierIdx;
-      delete p[m.id].level;
+    const rec = p[m.id];
+    if(!rec){
+      p[m.id] = { currentDiv:0, progress: VISION_DIVISIONS.map(()=>({level:0,bestScore:0,sessions:0})) };
+      return;
+    }
+    if(rec.progress === undefined){
+      // migrate older shapes (the v41-and-earlier flat {level:1-5}, or the
+      // v42 {div,tier} pair) into v43's per-division {currentDiv,progress[4]}
+      // so a tester's single furthest-reached spot seeds that division's
+      // starting level instead of resetting everyone to the bottom. The
+      // other three divisions start fresh at Level 1 -- they're free to
+      // select and grind on their own from here.
+      if(rec.div === undefined){
+        const oldLevel = rec.level || 1;
+        const G = Math.min(11, Math.max(0, Math.round((oldLevel-1)/4*11)));
+        rec.div = Math.floor(G/3);
+        rec.tier = G%3;
+      }
+      const level = Math.min(4, Math.round((rec.tier||0)/2*4));
+      const progress = VISION_DIVISIONS.map(()=>({level:0,bestScore:0,sessions:0}));
+      progress[rec.div] = { level, bestScore: rec.bestScore||0, sessions: rec.sessions||0 };
+      p[m.id] = { currentDiv: rec.div, progress };
     }
   });
   return p;
@@ -3276,9 +3298,11 @@ function gamesRank(xp){
 
 function shuffleArr(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; }
 
+function visionBestOverall(rec){ return Math.max(...rec.progress.map(d=>d.bestScore)); }
+
 function renderGamesHub(){
   const vp = loadVisionProgress();
-  const visionXp = VISION_MODULES.reduce((s,m)=>s+vp[m.id].bestScore,0);
+  const visionXp = VISION_MODULES.reduce((s,m)=>s+visionBestOverall(vp[m.id]),0);
   const gp = loadGameIqProgress();
   let html = `<div class="page-head"><h1>Games</h1><div class="sub">Two quick training games -- Vision Lab sharpens the visual recognition skills real sports-vision programs train; Game IQ tests situational baseball knowledge until it's automatic.</div></div>`;
   html += `<div class="games-hub-grid">
@@ -3308,12 +3332,13 @@ function renderVisionLab(){
   const vp = loadVisionProgress();
   let html = `<div class="page-head"><div class="crumbs"><a href="#" onclick="go('games');return false;" style="color:var(--accent);">Games</a></div><h1>Vision Lab</h1><div class="sub">5 short modules modeled on real sports-vision training drills. Each one tracks its own division and best score.</div></div>`;
   html += `<div class="module-grid">` + VISION_MODULES.map(m=>{
-    const p = vp[m.id];
-    const dv = VISION_DIVISIONS[p.div];
+    const rec = vp[m.id];
+    const dv = VISION_DIVISIONS[rec.currentDiv];
+    const p = rec.progress[rec.currentDiv];
     return `<div class="module-card" onclick="go('vision-module','${m.id}')">
       <div class="module-card-head"><div class="icn">${icon(m.icon)}</div><div class="module-card-name">${m.name}</div></div>
       <div class="module-card-tag">${m.tagline}</div>
-      <div class="module-card-foot"><span>${dv.short} · T${p.tier+1}</span><span>Best ${p.bestScore}%</span></div>
+      <div class="module-card-foot"><span>${dv.short} · L${p.level+1}</span><span>Best ${p.bestScore}%</span></div>
     </div>`;
   }).join("") + `</div>`;
   return html;
@@ -3333,15 +3358,16 @@ function vStage(){ return document.getElementById('vstage'); }
 function vShowIntro(id){
   const m = visionModule(id);
   const vp = loadVisionProgress();
-  const p = vp[id];
-  const dv = VISION_DIVISIONS[p.div];
+  const rec = vp[id];
+  const div = rec.currentDiv;
+  const p = rec.progress[div];
   const root = vRoot(); if(!root) return;
   root.innerHTML = `
     <div class="vstage-wrap">
       <div class="vstage-msg">${m.blurb}</div>
-      <div class="giq-stat-row" style="margin-top:16px;">
-        <div class="giq-stat"><div class="n">${dv.short}</div><div class="l">Division</div></div>
-        <div class="giq-stat"><div class="n">${p.tier+1}/3</div><div class="l">Tier</div></div>
+      <div class="vdiv-picker" style="margin-top:16px;">${VISION_DIVISIONS.map((d,i)=>`<div class="vdiv-btn ${i===div?'active':''}" onclick="switchVisionDivision('${id}',${i})">${d.short}</div>`).join("")}</div>
+      <div class="giq-stat-row" style="margin-top:10px;">
+        <div class="giq-stat"><div class="n">${p.level+1}/5</div><div class="l">Level</div></div>
         <div class="giq-stat"><div class="n">${p.bestScore}%</div><div class="l">Best score</div></div>
         <div class="giq-stat"><div class="n">${p.sessions}</div><div class="l">Sessions</div></div>
       </div>
@@ -3349,33 +3375,43 @@ function vShowIntro(id){
     </div>`;
 }
 
-// v42: 4 divisions x 3 tiers = 12 steps (G 0-11), replacing the old flat
-// Level 1-5. Exposure/duration/window times shorten and distractor counts
+// v43: Josh -- "select youth, high school, college or MLB... within each
+// division i want to make it 5 levels." 4 divisions x 5 levels = 20 steps
+// (G 0-19). Exposure/duration/window times shorten and distractor counts
 // grow as G rises within each module, same "start easy, tighten the window"
-// progression the old 5-level system used -- just with 4x the runway and a
-// real division boundary at Youth/HS/College/MLB. See the VISION_DIVISIONS
-// comment above for the reaction-time research behind the numbers.
+// progression the earlier tier system used, just with a level-per-division
+// grain instead of 3. See the VISION_DIVISIONS comment above for the
+// reaction-time research anchoring the low and high ends.
 function visionLevelConfig(moduleId, G){
-  const g = Math.max(0, Math.min(11, G));
+  const g = Math.max(0, Math.min(19, G));
   const cfgs = {
-    "flash-recall": { digits:[2,2,2,3,3,3,3,4,4,4,5,5][g], exposureMs:[900,750,650,550,480,420,380,340,300,260,220,180][g], reps:8 },
-    "peripheral-snap": { exposureMs:[650,580,520,460,420,380,340,310,280,250,220,190][g], reps:10 },
-    "reaction-gate": { window:[900,820,760,700,640,580,520,460,400,350,290,230][g], noGoRatio:[0.2,0.22,0.25,0.28,0.3,0.32,0.34,0.36,0.38,0.4,0.42,0.45][g], reps:12 },
-    "track-ball": { durationMs:[2200,2000,1850,1650,1500,1350,1200,1050,900,750,600,450][g], reps:8 },
-    "light-tree": { reactionMs:[650,580,520,500,470,440,410,380,350,300,220,150][g], reps:8 },
+    "flash-recall": { digits:[2,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,5,5,5,5][g], exposureMs:[900,860,820,790,750,710,670,630,600,560,520,480,450,410,370,330,290,260,220,180][g], reps:8 },
+    "peripheral-snap": { exposureMs:[650,630,600,580,550,530,500,480,460,430,410,380,360,340,310,290,260,240,210,190][g], reps:10 },
+    "reaction-gate": { window:[900,860,830,790,760,720,690,650,620,580,550,510,480,440,410,370,340,300,270,230][g], noGoRatio:[0.2,0.21,0.23,0.24,0.25,0.27,0.28,0.29,0.31,0.32,0.33,0.34,0.36,0.37,0.38,0.4,0.41,0.42,0.44,0.45][g], reps:12 },
+    "track-ball": { durationMs:[2200,2110,2020,1920,1830,1740,1650,1560,1460,1370,1280,1190,1090,1000,910,820,730,630,540,450][g], reps:8 },
+    "light-tree": { reactionMs:[650,620,600,570,540,520,490,470,440,410,390,360,330,310,280,260,230,200,180,150][g], reps:8 },
   };
   return cfgs[moduleId];
 }
 
+function switchVisionDivision(id, divIdx){
+  const vp = loadVisionProgress();
+  vp[id].currentDiv = divIdx;
+  saveVisionProgress(vp);
+  vShowIntro(id);
+}
+
 function startVisionSession(id){
   const vp = loadVisionProgress();
-  const { div, tier } = vp[id];
-  const G = visionG(div, tier);
-  vLive = { id, div, tier, cfg: visionLevelConfig(id, G), repIdx:0, correct:0, awaiting:false, timer:null };
+  const rec = vp[id];
+  const div = rec.currentDiv;
+  const level = rec.progress[div].level;
+  const G = visionG(div, level);
+  vLive = { id, div, level, cfg: visionLevelConfig(id, G), repIdx:0, correct:0, awaiting:false, timer:null };
   const root = vRoot(); if(!root) return;
   const dv = VISION_DIVISIONS[div];
   root.innerHTML = `
-    <div class="vstage-hud"><span>${dv.short} <b>T${tier+1}</b></span><span id="vhud-rep">Rep <b>1</b> / ${vLive.cfg.reps}</span><span id="vhud-score">Correct <b>0</b></span></div>
+    <div class="vstage-hud"><span>${dv.short} <b>L${level+1}</b></span><span id="vhud-rep">Rep <b>1</b> / ${vLive.cfg.reps}</span><span id="vhud-score">Correct <b>0</b></span></div>
     <div class="vstage-wrap"><div class="vstage" id="vstage"></div><div id="vsub"></div></div>`;
   vStartRep();
 }
@@ -3499,7 +3535,7 @@ function vResolveTrack(tapTime){
    fires after a random hold (so the hold can't be counted/memorized) --
    tap the instant it goes. Tapping before green is a red-light foul, same
    as a real strip. See VISION_DIVISIONS above for the reaction-time
-   research behind each tier's target. */
+   research behind each level's target. */
 function vStartLightTree(){
   vStage().innerHTML = `<div class="light-tree">
     <div class="lt-bulb amber" id="lt-a1"></div>
@@ -3541,7 +3577,7 @@ function vResolveLightTree(tapTime){
     <div class="rxn-gap">${foul ? 'FOUL' : rt}<span>${foul?'':'ms'}</span></div>
     <div class="rxn-pill ${correct?'hit':'miss'}">${foul?'Foul Start':(correct?'Hit':'Miss')}</div>
     <div class="rxn-line">${foul ? "You left before green." : `Your reaction was <b>${rt} ms</b>`}</div>
-    <div class="rxn-target">Target for this tier <b>${vLive.cfg.reactionMs} ms</b></div>
+    <div class="rxn-target">Target for this level <b>${vLive.cfg.reactionMs} ms</b></div>
     <button class="btn btn-primary" style="width:auto;padding:10px 24px;margin-top:14px;" onclick="vContinueLightTree()">Continue</button>
   </div>`;
   vUpdateHud();
@@ -3580,32 +3616,26 @@ function vEndRep(correct, label){
 }
 
 function vFinishSession(){
-  const { id, div, tier, correct, cfg } = vLive;
+  const { id, div, level, correct, cfg } = vLive;
   const pct = Math.round(100*correct/cfg.reps);
   const vp = loadVisionProgress();
-  const p = vp[id];
+  const p = vp[id].progress[div];
   p.sessions++;
   if(pct > p.bestScore) p.bestScore = pct;
-  const atPeak = div === VISION_DIVISIONS.length-1 && tier === 2;
-  const advanced = pct >= 80 && !atPeak;
+  const atMax = level === 4;
+  const advanced = pct >= 80 && !atMax;
   let advanceMsg = "";
   if(advanced){
-    if(tier < 2){
-      p.tier = tier+1;
-      advanceMsg = `Tier up! You're now Tier ${p.tier+1} in ${VISION_DIVISIONS[div].name}.`;
-    } else {
-      p.div = div+1;
-      p.tier = 0;
-      advanceMsg = `Division up! Welcome to ${VISION_DIVISIONS[p.div].name}.`;
-    }
+    p.level = level+1;
+    advanceMsg = `Level up! You're now Level ${p.level+1} in ${VISION_DIVISIONS[div].name}.`;
   }
   saveVisionProgress(vp);
-  const m = visionModule(id);
+  const isMlbPeak = atMax && div === VISION_DIVISIONS.length-1;
   const root = vRoot();
   if(root) root.innerHTML = `
     <div class="vstage-wrap" style="text-align:center;">
       <div class="module-card-name" style="font-size:20px;margin-bottom:6px;">${pct}% \u2014 ${correct}/${cfg.reps} correct</div>
-      <div class="vstage-msg">${advanced ? advanceMsg : (atPeak && pct>=80 ? "Elite run \u2014 you're topping out MLB-level reaction time." : (pct>=80 ? "Great session." : "Keep at it \u2014 80% advances you."))}</div>
+      <div class="vstage-msg">${advanced ? advanceMsg : (isMlbPeak && pct>=80 ? "Elite run \u2014 you're topping out MLB-level reaction time." : (atMax && pct>=80 ? `Maxed out ${VISION_DIVISIONS[div].name}! Pick a tougher division above to keep climbing.` : (pct>=80 ? "Great session." : "Keep at it \u2014 80% advances you.")))}</div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
         <button class="btn btn-primary" style="width:auto;padding:10px 20px;" onclick="startVisionSession('${id}')">Play Again</button>
         <button class="btn btn-ghost" style="width:auto;padding:10px 20px;" onclick="go('vision-lab')">Back to Vision Lab</button>
