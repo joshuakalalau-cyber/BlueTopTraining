@@ -97,6 +97,7 @@ input,select{font-family:inherit;}
 .ex-icons{display:flex;gap:6px;flex-shrink:0;}
 .ex-icon-btn{width:30px;height:30px;border-radius:2px;border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
 .ex-icon-btn svg{width:14px;height:14px;}
+.dp-chevron svg{width:16px;height:16px;}
 .ex-icon-btn:hover{border-color:var(--accent);color:var(--accent);}
 .ex-icon-btn.open{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
 .ex-panel{margin:8px 18px 4px;padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:2px;}
@@ -2845,7 +2846,7 @@ function renderDailyPlan(){
     let h = `<div class="item-block" style="margin-bottom:14px;">`;
     h += `<div onclick="toggleDailyPlanSection('${key}')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;">
       <span style="font-size:13.5px;font-weight:600;color:var(--text);">${label}</span>
-      <span style="color:var(--text-mute);display:flex;transform:rotate(${open?180:0}deg);">${icon('chevrondown')}</span>
+      <span class="dp-chevron" style="color:var(--text-mute);display:flex;transform:rotate(${open?180:0}deg);">${icon('chevrondown')}</span>
     </div>`;
     if(open) h += `<div style="border-top:1px solid var(--border);">${innerHtml}</div>`;
     h += `</div>`;
