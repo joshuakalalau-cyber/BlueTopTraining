@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blue Top Training</title>
-<!-- build v44 -->
+<!-- build v45 -->
 <style>
 /* v31: Kaipa Polo retheme -- palette pulled from Josh's reference shirt photo
    (black polo, cyan/turquoise line-art leaf print). Base moves from navy to
@@ -512,7 +512,7 @@ const ICONS = {
   chevrondown:'<polyline points="6 9 12 15 18 9"/>',
   bolt:'<path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/>',
 };
-const APP_VERSION = "v44";
+const APP_VERSION = "v45";
 function icon(name){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg>'; }
 
 /* ---------------------- Sample content (6 categories) ------------------ */
@@ -969,7 +969,7 @@ function scBlockMetaForWeek(track, week){
 // in-season week, run with a fixed 5-bat set (72/66/45/24/16 oz) for both
 // HS and college/adult hitters. Structure: 3 sessions/week (Day 1-3, meant
 // for non-consecutive days), every session runs all 5 bats heavy-to-light
-// at 3x10 each. The week -> day -> set-by-set shape matches S&C so it logs
+// at 3x10 each (v45: now 3 sets at 5/5/3 reps per bat). The week -> day -> set-by-set shape matches S&C so it logs
 // weight/reps/completion the same way. Weeks 1-2 = Foundation (mechanics
 // under load), Weeks 3-4 = Build (start tracking bat speed/EV at the 45oz
 // and 16oz ends), Weeks 5-6 = Transfer (add a game-bat contrast-finish set
@@ -984,7 +984,8 @@ const BAT_LADDER = [
   { name:"16 oz Bat — Extreme Underload", note:"Trains maximum bat speed and CNS firing rate. Flips or fast front toss. Watch closely for overswinging, flying open early, or losing the back side." },
 ];
 function batBuildDay(dayLabel, phase, isThirdSession){
-  const items = BAT_LADDER.map(b => ({ name:b.name, sets:"3x10", note:b.note }));
+  // v45: Josh -- "still 3 sets of each bat but i want the reps to be 5,5,3".
+  const items = BAT_LADDER.map(b => ({ name:b.name, sets:"3x5/5/3", note:b.note }));
   if(phase === "build"){
     items[2].note += " Start tracking bat speed/exit velo here (radar, HitTrax, or a bat sensor) to establish a baseline.";
     items[4].note += " Track bat speed/exit velo here too — this is the other baseline point for the block.";
@@ -1028,7 +1029,7 @@ VELO Sports and Dr. Tyler Standifird's data (ABCA Webinar, October 2024) found h
   { tag:"VIDEO, Joe Kelch, Northern Illinois Univ.", h:"Weekly Structure", body:
 `3 sessions per week, ideally on non-consecutive days (for example Monday/Wednesday/Friday), so the forearms and wrists get a full day of recovery between sessions.
 
-Each session runs about 45 minutes and consists of 3 sets of 10 swings on each of the 5 bats in the progression — 150 total swings per session, 450 per week.
+Each session consists of 3 sets on each of the 5 bats in the progression — 5 swings, 5 swings, then 3 swings — 13 swings per bat, 65 total swings per session, 195 per week.
 
 Swings can be taken off a tee or on soft-toss/flips. Tee work is required for the two heaviest bats (see Safety section below); flips are appropriate once the hitter is on the lighter end of the progression and mechanics are holding up.
 
@@ -1525,7 +1526,13 @@ function startOverScTrack(track){
 // Parse a display string like "4x5", "3x8/side", "6 reps", "15 min" into a
 // set count + a per-set target label, so each set gets its own RP-style row.
 function parseSets(str){
-  let m = /^(\d+)\s*x\s*(.+)$/i.exec(str);
+  // v45: per-set rep schemes, e.g. "3x5/5/3" -> 3 sets with targets 5, 5, 3.
+  let m = /^(\d+)\s*x\s*(\d+(?:\s*\/\s*\d+)+)$/i.exec(str);
+  if(m){
+    const labels = m[2].split("/").map(x => x.trim());
+    if(labels.length === parseInt(m[1],10)) return { count: labels.length, label: labels.join("/"), labels };
+  }
+  m = /^(\d+)\s*x\s*(.+)$/i.exec(str);
   if(m) return { count: parseInt(m[1],10), label: m[2].trim() };
   m = /^(\d+)\s*reps?$/i.exec(str);
   if(m) return { count: 1, label: m[1] + " reps" };
@@ -2560,7 +2567,7 @@ function renderStrengthHub(){
       html += `<div class="set-row">
         <div class="set-num">${s+1}</div>
         <input type="text" inputmode="decimal" value="${st.weight}" placeholder="—" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'weight',this.value)">
-        <input type="text" value="${st.reps}" placeholder="${parsed.label}" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'reps',this.value)">
+        <input type="text" value="${st.reps}" placeholder="${parsed.labels ? parsed.labels[s] : parsed.label}" onchange="updateSetField('${scTab}',${viewWeek},${di},${exIdx},${s},'reps',this.value)">
         <div class="log-box ${st.logged?'done':''}" onclick="toggleSetLog('${scTab}',${viewWeek},${di},${exIdx},${s})">${st.logged?icon('check'):''}</div>
       </div>`;
     }
@@ -2758,7 +2765,7 @@ function renderBatProgram(){
       html += `<div class="set-row">
         <div class="set-num">${s+1}</div>
         <input type="text" inputmode="decimal" value="${st.weight}" placeholder="—" onchange="updateBatSetField(${viewWeek},${di},${exIdx},${s},'weight',this.value)">
-        <input type="text" value="${st.reps}" placeholder="${parsed.label}" onchange="updateBatSetField(${viewWeek},${di},${exIdx},${s},'reps',this.value)">
+        <input type="text" value="${st.reps}" placeholder="${parsed.labels ? parsed.labels[s] : parsed.label}" onchange="updateBatSetField(${viewWeek},${di},${exIdx},${s},'reps',this.value)">
         <div class="log-box ${st.logged?'done':''}" onclick="toggleBatSetLog(${viewWeek},${di},${exIdx},${s})">${st.logged?icon('check'):''}</div>
       </div>`;
     }
