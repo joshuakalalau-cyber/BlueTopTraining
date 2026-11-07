@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blue Top Training</title>
-<!-- build v18b -->
+<!-- build v44 -->
 <style>
 /* v31: Kaipa Polo retheme -- palette pulled from Josh's reference shirt photo
    (black polo, cyan/turquoise line-art leaf print). Base moves from navy to
@@ -57,7 +57,7 @@ input,select{font-family:inherit;}
 .login-note{font-size:11px;color:var(--text-mute);margin-top:18px;line-height:1.5;text-align:center;}
 
 /* ---------- Disclaimer modal ---------- */
-#disclaimer-modal{position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;background:rgba(6,11,24,0.92);padding:20px;}
+#disclaimer-modal{position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;background:rgba(10,10,13,0.92);padding:20px;}
 #disclaimer-modal.active{display:flex;}
 .disclaimer-card{width:480px;max-width:100%;max-height:86vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:2px;padding:28px 26px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.5);}
 .disclaimer-card h2{margin:0 0 14px;font-size:17px;letter-spacing:0.02em;}
@@ -71,7 +71,7 @@ input,select{font-family:inherit;}
 .swap-btn{flex-shrink:0;width:34px;height:34px;border-radius:2px;border:1px solid var(--border);background:var(--panel2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;padding:0;}
 .swap-btn svg{width:16px;height:16px;}
 .swap-btn:hover{border-color:var(--accent);color:var(--accent);}
-#swap-sheet{position:fixed;inset:0;z-index:998;display:none;align-items:flex-end;justify-content:center;background:rgba(6,11,24,0.75);}
+#swap-sheet{position:fixed;inset:0;z-index:998;display:none;align-items:flex-end;justify-content:center;background:rgba(10,10,13,0.75);}
 #swap-sheet.active{display:flex;}
 .swap-sheet-card{width:100%;max-width:480px;max-height:70vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:2px 2px 0 0;padding:18px 18px 24px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 -8px 24px rgba(0,0,0,0.5);}
 .swap-sheet-title{font-size:13px;color:var(--text-mute);margin-bottom:10px;}
@@ -89,7 +89,7 @@ input,select{font-family:inherit;}
    inline panel below the header, reusing the existing inlineVideoBody()
    pattern for video and a new compact list for history. */
 .ex-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border-radius:2px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;color:#fff;margin-bottom:6px;}
-.ex-tag .bars{display:flex;gap:1.5px;align-items:flex-end;height:9px;}
+.ex-tag .bars{display:flex;gap:1.5px;align-items:flex-end;height:9px;margin-top:0;}
 .ex-tag .bars span{width:2px;background:currentColor;opacity:0.85;border-radius:1px;}
 .ex-tag .bars span:nth-child(1){height:40%;}
 .ex-tag .bars span:nth-child(2){height:100%;}
@@ -117,7 +117,7 @@ input,select{font-family:inherit;}
 .sidebar::before{
   content:"";position:absolute;inset:0;pointer-events:none;
   background-image:
-    linear-gradient(to bottom, rgba(6,11,24,0.85), rgba(6,11,24,0.95)),
+    linear-gradient(to bottom, rgba(10,10,13,0.85), rgba(10,10,13,0.95)),
     url('lauhala-metallic-dark.jpg');
   background-repeat:repeat;
   background-size:300px auto;
@@ -145,7 +145,7 @@ input,select{font-family:inherit;}
 .page-head::before{
   content:"";position:absolute;inset:0;pointer-events:none;
   background-image:
-    linear-gradient(to bottom, rgba(6,11,24,0.85), rgba(6,11,24,0.95)),
+    linear-gradient(to bottom, rgba(10,10,13,0.85), rgba(10,10,13,0.95)),
     url('lauhala-metallic-dark.jpg');
   background-repeat:repeat;
   background-size:300px auto;
@@ -512,6 +512,7 @@ const ICONS = {
   chevrondown:'<polyline points="6 9 12 15 18 9"/>',
   bolt:'<path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/>',
 };
+const APP_VERSION = "v44";
 function icon(name){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg>'; }
 
 /* ---------------------- Sample content (6 categories) ------------------ */
@@ -2353,10 +2354,17 @@ function renderNav(){
   ).join("");
 }
 
+// v44: go() writes location.hash, which fires "hashchange" -- which used to
+// call go() a second time and render every screen twice. lastRouteHash lets
+// the listener (see Boot) skip the echo of our own write and only react to
+// real back/forward navigation.
+let lastRouteHash = "";
 function go(view, param){
+  vStopVision(); // v44: any re-render tears down the Vision Lab stage, so kill its timers too
   if(view === "progress") view = progressLastTab;
   if(view === "strength-hub" || view === "bat-program") progressLastTab = view;
-  location.hash = view + (param ? "/"+param : "");
+  lastRouteHash = view + (param ? "/"+param : "");
+  if(location.hash.replace("#","") !== lastRouteHash) location.hash = lastRouteHash;
   document.querySelectorAll(".nav-item").forEach(el => el.classList.toggle("active", el.dataset.nav === navGroupFor(view)));
   const main = document.getElementById("main");
   if(view === "daily-plan") main.innerHTML = renderDailyPlan();
@@ -3182,7 +3190,8 @@ function renderProfile(){
     ${trainingAgeRow}
   </div>
   <button class="btn btn-ghost" style="width:auto;padding:10px 20px;" onclick="signOut()">Sign Out</button>
-  <div class="hint">v1 prototype — this is a demo account for testing. Real accounts, password reset, and multi-hitter rosters are planned for v2.</div>`;
+  <div class="hint">v1 prototype — this is a demo account for testing. Real accounts, password reset, and multi-hitter rosters are planned for v2.</div>
+  <div class="hint">Build ${APP_VERSION}</div>`;
 }
 
 /* ---------------------- Games: Vision Lab + Game IQ (v33) ------------------
@@ -3326,6 +3335,28 @@ function renderGamesHub(){
 
 let vLive = null; // active session state (module id, level, cfg, rep progress)
 
+// v44: every Vision Lab timeout goes through vLater(), which (a) remembers the
+// id so vStopVision() can cancel it and (b) only runs if the SAME session is
+// still live. Before this, leaving a game mid-session left timers running
+// (throwing on a missing stage), and a leftover timer from an old run could
+// fire into a brand-new session -- e.g. lighting Light Tree's green early.
+function vLater(fn, ms){
+  const owner = vLive;
+  const id = setTimeout(()=>{ if(owner && vLive === owner) fn(); }, ms);
+  if(owner){ (owner.timers || (owner.timers = [])).push(id); }
+  return id;
+}
+function vStopVision(){
+  if(!vLive) return;
+  (vLive.timers || []).forEach(clearTimeout);
+  clearTimeout(vLive.timer); clearTimeout(vLive.timer2);
+  vLive = null;
+}
+// v44: high-resolution clock for reaction timing. Taps use the pointerdown
+// event's own timeStamp (same clock), not a click handler -- click only fires
+// on finger RELEASE, which was silently adding ~50-100ms to every reaction.
+function vNow(){ return performance.now(); }
+
 function visionModule(id){ return VISION_MODULES.find(m=>m.id===id); }
 
 function renderVisionLab(){
@@ -3407,7 +3438,8 @@ function startVisionSession(id){
   const div = rec.currentDiv;
   const level = rec.progress[div].level;
   const G = visionG(div, level);
-  vLive = { id, div, level, cfg: visionLevelConfig(id, G), repIdx:0, correct:0, awaiting:false, timer:null };
+  vStopVision();
+  vLive = { id, div, level, cfg: visionLevelConfig(id, G), repIdx:0, correct:0, awaiting:false, timer:null, timers:[] };
   const root = vRoot(); if(!root) return;
   const dv = VISION_DIVISIONS[div];
   root.innerHTML = `
@@ -3445,10 +3477,10 @@ function vFlashChoices(answer, digits){
 function vStartFlashRecall(){
   const answer = vRandomDigits(vLive.cfg.digits);
   vStage().innerHTML = `<div class="vstage-msg">Ready...</div>`;
-  vLive.timer = setTimeout(()=>{
+  vLive.timer = vLater(()=>{
     if(!vLive) return;
     vStage().innerHTML = `<div class="vstage-flash">${answer}</div>`;
-    vLive.timer = setTimeout(()=>{
+    vLive.timer = vLater(()=>{
       if(!vLive) return;
       vStage().innerHTML = `<div class="vstage-msg">What did you see?</div>`;
       const choices = vFlashChoices(answer, vLive.cfg.digits);
@@ -3462,14 +3494,14 @@ function vStartFlashRecall(){
 function vStartPeripheral(){
   vStage().innerHTML = `<div class="vstage-fixation"></div>`;
   const delay = 500 + Math.random()*900;
-  vLive.timer = setTimeout(()=>{
+  vLive.timer = vLater(()=>{
     if(!vLive) return;
     const side = Math.random()<0.5 ? "left" : "right";
     vStage().innerHTML = `<div class="vstage-fixation"></div><div class="vstage-peripheral-target ${side}">●</div>`;
-    setTimeout(()=>{ const t=document.querySelector('.vstage-peripheral-target'); if(t) t.style.visibility="hidden"; }, vLive.cfg.exposureMs);
+    vLater(()=>{ const t=document.querySelector('.vstage-peripheral-target'); if(t) t.style.visibility="hidden"; }, vLive.cfg.exposureMs);
     vLive.awaiting = true;
     document.getElementById('vsub').innerHTML = `<div class="answer-grid"><button class="answer-btn" data-val="left" onclick="vAnswerMC('left','${side}')">← Left</button><button class="answer-btn" data-val="right" onclick="vAnswerMC('right','${side}')">Right →</button></div>`;
-    vLive.timer = setTimeout(()=>{ if(vLive && vLive.awaiting) vAnswerMC('none', side); }, 1400);
+    vLive.timer = vLater(()=>{ if(vLive && vLive.awaiting) vAnswerMC('none', side); }, 1400);
   }, delay);
 }
 
@@ -3477,14 +3509,14 @@ function vStartPeripheral(){
 function vStartReaction(){
   vStage().innerHTML = `<div class="vstage-msg">Wait...</div>`;
   const delay = 500 + Math.random()*1000;
-  vLive.timer = setTimeout(()=>{
+  vLive.timer = vLater(()=>{
     if(!vLive) return;
     const isGo = Math.random() > vLive.cfg.noGoRatio;
     vLive.isGo = isGo;
     vLive.tapped = false;
     vLive.awaiting = true;
-    vStage().innerHTML = `<div class="vstage-reaction-dot ${isGo?'go':'nogo'}" onclick="vTapReaction()"></div>`;
-    vLive.timer = setTimeout(()=>{ if(vLive && vLive.awaiting) vResolveReaction(); }, vLive.cfg.window);
+    vStage().innerHTML = `<div class="vstage-reaction-dot ${isGo?'go':'nogo'}" onpointerdown="event.preventDefault();vTapReaction()"></div>`;
+    vLive.timer = vLater(()=>{ if(vLive && vLive.awaiting) vResolveReaction(); }, vLive.cfg.window);
   }, delay);
 }
 function vTapReaction(){
@@ -3507,17 +3539,22 @@ function vResolveReaction(){
    instead of a moving one. */
 function vStartTrackBall(){
   vStage().innerHTML = `<div class="vstage-zone"></div><div class="vstage-ball" id="vball"></div>`;
-  document.getElementById('vsub').innerHTML = `<button class="big-tap-zone" onclick="vTapTrackHit()">HIT</button>`;
+  document.getElementById('vsub').innerHTML = `<button class="big-tap-zone" onpointerdown="vTapTrackHit(event)">HIT</button>`;
   const ball = document.getElementById('vball');
   const dur = vLive.cfg.durationMs;
   vLive.awaiting = true;
-  vLive.idealAt = Date.now() + dur;
-  requestAnimationFrame(()=>{ ball.style.transition = `left ${dur}ms linear`; ball.style.left = "88%"; });
-  vLive.timer = setTimeout(()=>{ if(vLive && vLive.awaiting) vResolveTrack(null); }, dur + 500);
+  vLive.idealAt = vNow() + dur;
+  requestAnimationFrame(()=>{
+    if(!vLive) return;
+    ball.style.transition = `left ${dur}ms linear`; ball.style.left = "88%";
+    vLive.idealAt = vNow() + dur; // anchor to when the motion actually starts
+  });
+  vLive.timer = vLater(()=>{ if(vLive && vLive.awaiting) vResolveTrack(null); }, dur + 500);
 }
-function vTapTrackHit(){
+function vTapTrackHit(e){
   if(!vLive || !vLive.awaiting) return;
-  vResolveTrack(Date.now());
+  if(e) e.preventDefault();
+  vResolveTrack(e && e.timeStamp ? e.timeStamp : vNow());
 }
 function vResolveTrack(tapTime){
   if(!vLive || !vLive.awaiting) return;
@@ -3543,23 +3580,26 @@ function vStartLightTree(){
     <div class="lt-bulb amber" id="lt-a3"></div>
     <div class="lt-bulb green" id="lt-g"></div>
   </div>`;
-  document.getElementById('vsub').innerHTML = `<button class="big-tap-zone" onclick="vTapLightTree()">GO</button>`;
+  document.getElementById('vsub').innerHTML = `<button class="big-tap-zone" onpointerdown="vTapLightTree(event)">GO</button>`;
   vLive.awaiting = true;
   vLive.greenAt = null;
-  vLive.timer = setTimeout(()=>{
+  vLive.timer = vLater(()=>{
     if(!vLive) return;
     ['lt-a1','lt-a2','lt-a3'].forEach(elId=>{ const el = document.getElementById(elId); if(el) el.classList.add('lit'); });
   }, 400);
   const holdMs = 800 + Math.random()*1700;
-  vLive.timer2 = setTimeout(()=>{
+  vLive.timer2 = vLater(()=>{
     if(!vLive) return;
     const g = document.getElementById('lt-g'); if(g) g.classList.add('lit');
-    vLive.greenAt = Date.now();
+    // v44: start the clock on the frame the green bulb is actually drawn,
+    // not the moment the class is set (up to a frame earlier).
+    requestAnimationFrame(()=>{ if(vLive) vLive.greenAt = vNow(); });
   }, 400 + holdMs);
 }
-function vTapLightTree(){
+function vTapLightTree(e){
   if(!vLive || !vLive.awaiting) return;
-  vResolveLightTree(Date.now());
+  if(e) e.preventDefault();
+  vResolveLightTree(e && e.timeStamp ? e.timeStamp : vNow());
 }
 function vResolveLightTree(tapTime){
   if(!vLive || !vLive.awaiting) return;
@@ -3567,7 +3607,7 @@ function vResolveLightTree(tapTime){
   clearTimeout(vLive.timer);
   clearTimeout(vLive.timer2);
   const foul = !vLive.greenAt || tapTime < vLive.greenAt;
-  const rt = foul ? null : (tapTime - vLive.greenAt);
+  const rt = foul ? null : Math.round(tapTime - vLive.greenAt);
   const correct = !foul && rt <= vLive.cfg.reactionMs;
   if(correct) vLive.correct++;
   vLive.repIdx++;
@@ -3608,7 +3648,7 @@ function vEndRep(correct, label){
   vLive.repIdx++;
   const stage = vStage();
   if(stage) stage.insertAdjacentHTML('beforeend', `<div class="vstage-result-flash ${correct?'good':'bad'}">${label||(correct?'Correct':'Miss')}</div>`);
-  setTimeout(()=>{
+  vLater(()=>{
     if(!vLive) return;
     if(vLive.repIdx >= vLive.cfg.reps) vFinishSession();
     else vStartRep();
@@ -3815,7 +3855,13 @@ function giqAnswer(choice){
 
 /* ---------------------- Boot ------------------------------------------------- */
 
-window.addEventListener("hashchange", () => { if(session){ const [v,p] = location.hash.replace("#","").split("/"); go(v||"current", p); } });
+window.addEventListener("hashchange", () => {
+  if(!session) return;
+  const h = location.hash.replace("#","");
+  if(h === lastRouteHash) return; // our own go() write -- already rendered
+  const [v,p] = h.split("/");
+  go(v || "daily-plan", p); // v44: empty hash used to land on the retired v1 "current" screen
+});
 
 if(session && USERS[session.username]){
   enterApp();
